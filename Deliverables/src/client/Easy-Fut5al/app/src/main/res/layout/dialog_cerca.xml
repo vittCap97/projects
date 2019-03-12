@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/txt_exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:text= "Cerca partite nella località specificata"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        android:textStyle="italic"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Switch
+            android:layout_gravity="right"
+            android:layout_margin="5dp"
+            android:id="@+id/switchh"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/colorAccent"
+            android:textSize="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="in tutte le località"
+            android:checked="true"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:visibility="invisible"
+        android:layout_margin="5dp"
+        android:orientation="horizontal" >
+
+
+        <EditText
+            android:id="@+id/casella"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nome Città"
+            android:text=""
+            android:maxLength="20"
+            android:singleLine="true"
+            android:ems="10" >
+        </EditText>
+
+        <Button
+            android:id="@+id/btn_cerca"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@color/colorPrimary"
+            android:clickable="true"
+            android:text="Cerca"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            />
+
+
+    </LinearLayout>
+
+</LinearLayout>

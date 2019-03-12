@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+   >
+
+    <LinearLayout
+        android:background="@drawable/background_button"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="top">
+
+        <ImageView
+            android:id="@+id/elem_lista_foto"
+            android:layout_width="50sp"
+            android:layout_height="50sp"
+            android:background="@drawable/pallone"
+            android:padding="3sp" />
+
+        <TextView
+            android:id="@+id/ora"
+            android:layout_width="50sp"
+            android:layout_height="match_parent"
+            android:padding="3sp"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Ore 7"/>
+
+        <TextView
+            android:id="@+id/data"
+            android:textAlignment="center"
+            android:padding="3sp"
+            android:textColor="@color/colorAccent"
+            android:layout_width="match_parent"
+            android:layout_height="50sp" />
+
+        <Button
+            android:id="@+id/tastoUnisciti"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UNISCITI"
+            android:onClick="uniscitiPartitaPubblica"/>
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/cod_partita"
+            android:text="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25dp"/>
+
+        <TextView
+            android:id="@+id/num_partecipanti"
+            android:text="5/10 partecipanti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/citta"
+            android:text="Novara"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"/>
+
+        <TextView
+            android:id="@+id/Tariffa"
+            android:text="5$"
+            android:textColor="@color/colorAccent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22dp"/>
+
+        <TextView
+            android:id="@+id/nome_campo"
+            android:text="Arechi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="17dp"/>
+
+
+
+    </LinearLayout>
+    </LinearLayout>
+
+
+
+</LinearLayout>
