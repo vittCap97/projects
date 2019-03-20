@@ -45,7 +45,8 @@ public class FragmentNuovaPartita  extends Fragment {
 
     private ArrayList<String> partite;
     private ArrayList<String> CampettiDisponibili;
-    public static  String URL;
+    public static  String URL1= "GetInfoServlet";
+    public static String URL2 ="CreaPartitaServlet";
     private AutoCompleteTextView textView;
     private ListView listData;
     private ListView listHour;
@@ -117,10 +118,34 @@ public class FragmentNuovaPartita  extends Fragment {
         }
         System.out.println("Creazione partita su campetto libero il "+dataOttenuta+" alle ore "+ casellaorario.getText().toString());
         layoutinviti.setVisibility(View.VISIBLE);
-        getInfoTask task = new getInfoTask();
-        SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-        URL = prefs.getString("URLserver", null) + "/EasyFut5al/GetInfoServlet";
-        task.execute(new String[] {URL});
+        ConnectionTask task = new ConnectionTask(URL1, getActivity().getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+               try{
+                String data = "tipo_oggetto=Atleta";
+                getConnessione().setDoOutput(true);//abilita la scrittura
+                OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                wr.write(data);//scrittura del content
+                wr.flush();}
+                catch (Exception ex){
+                   ex.printStackTrace();
+                }
+            }
+
+            @Override
+            protected void gestisciRispostaServer() {
+
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_element, R.id.textViewList,  getOutputDalServer());
+                CasellaNuovoInvitato.setAdapter(arrayAdapter);
+                CasellaNuovoInvitato.setOnFocusChangeListener(new View.OnFocusChangeListener(){
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        CasellaNuovoInvitato.showDropDown();
+                    }
+                });
+            }
+        };
+        task.execute();
 
         lista_inv = new ArrayList<>();
 
@@ -162,10 +187,56 @@ public class FragmentNuovaPartita  extends Fragment {
             @Override
             public void onClick(View v) {
 
-                CreaPartitaTask taskPartita = new CreaPartitaTask();
-                SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-                URL = prefs.getString("URLserver", null) + "/EasyFut5al/CreaPartitaServlet";
-                taskPartita.execute(new String[] {URL});
+                ConnectionTask taskPartita = new ConnectionTask(URL2, getActivity().getApplicationContext()) {
+                    @Override
+                    protected void inviaDatiAlServer() {
+                        try{
+                        String data = "tipo_oggetto=Atleta";
+                        getConnessione().setDoOutput(true);//abilita la scrittura
+                        OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+
+                        //Spedisci nome organizzatore
+                        SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                        String Email = prefs.getString("MyEmail", null);
+                        wr.write(Email+"\n");
+
+                        //spedisco orario
+                        wr.write(casellaorario.getText().toString()+"\n");
+
+                        //Spedisco data
+                        wr.write(DataOttenuta+"\n");
+
+                        //spedisco nome campetto
+                        wr.write(campettoScelto+"\n");
+
+                        //Spedisco nomi inviati
+                        for(String invitati: lista_inv) {
+                            wr.write(invitati+"\n");
+                        }
+
+
+                        wr.flush();
+                    }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    protected void gestisciRispostaServer() {
+                        for(String risposta: getOutputDalServer()){
+                            System.out.println(risposta);
+                        }
+                        if(getOutputDalServer().iterator().next().equals("Partita registrata con successo!")){
+                            Toast.makeText(getActivity(), "Partita creata con successo!", Toast.LENGTH_LONG).show();
+                        }
+                        else{
+                            Toast.makeText(getActivity(), "Errore creazione partita.. riprova :(", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                };
+
+                taskPartita.execute();
 
             }
         });
@@ -177,197 +248,4 @@ public class FragmentNuovaPartita  extends Fragment {
 
 
     }
-
-//----------------------------------------------------------------------------------------
-    private class getInfoTask extends AsyncTask<String, Void, ArrayList<String> > {
-
-
-
-        @Override
-        protected ArrayList<String> doInBackground(String... urls) {
-            ArrayList<String> output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        //Ricevi dati da Server
-        private ArrayList<String> getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            ArrayList<String> Partite = new ArrayList<String>();
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-
-                while ((s = buffer.readLine()) != null)
-                    Partite.add(s);
-
-                stream.close();
-
-                int i = 1;
-                for (String a : Partite) {
-                    System.out.println(i + " Atleti: " + a);
-                    i++;
-                }
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return Partite;
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                String data = "tipo_oggetto=Atleta";
-                connection.setDoOutput(true);//abilita la scrittura
-                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-                wr.write(data);//scrittura del content
-                wr.flush();
-                httpConnection.connect();
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(ArrayList<String> output) {
-
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_element, R.id.textViewList,  output);
-            CasellaNuovoInvitato.setAdapter(arrayAdapter);
-            CasellaNuovoInvitato.setOnFocusChangeListener(new View.OnFocusChangeListener(){
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    CasellaNuovoInvitato.showDropDown();
-                }
-            });
-        }
-    }
-    //---------------------------------------------
-
-
-
-
-    private class  CreaPartitaTask extends AsyncTask<String, Void, String> {
-
-
-
-        @Override
-        protected String doInBackground(String... urls) {
-            String output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        //Ricevi dati da Server
-        private String getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            String esito = null;
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-
-                esito =  buffer.readLine();
-
-                stream.close();
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return esito;
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-
-                String data = "tipo_oggetto=Atleta";
-                connection.setDoOutput(true);//abilita la scrittura
-                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-
-                //Spedisci nome organizzatore
-                SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-                String Email = prefs.getString("MyEmail", null);
-                wr.write(Email+"\n");
-
-                //spedisco orario
-                wr.write(casellaorario.getText().toString()+"\n");
-
-                //Spedisco data
-                wr.write(DataOttenuta+"\n");
-
-                //spedisco nome campetto
-                wr.write(campettoScelto+"\n");
-
-                //Spedisco nomi inviati
-                for(String invitati: lista_inv) {
-                    wr.write(invitati+"\n");
-                }
-
-
-                wr.flush();
-
-
-                httpConnection.connect();
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(String output) {
-            if(output.equals("Partita registrata con successo!")){
-                Toast.makeText(getActivity(), "Partita creata con successo!", Toast.LENGTH_LONG).show();
-            }
-            else{
-                Toast.makeText(getActivity(), "Errore creazione partita.. riprova :(", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-    //---------------------------------------------
-
-
-
-
-
-
-
-
 }

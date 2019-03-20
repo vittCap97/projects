@@ -37,8 +37,7 @@ public class RegistrationActivityGestore extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration_gestore);
 
-        SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-        URL = prefs.getString("URLserver", null) + "/EasyFut5al/RegistrazioneGestoreCampettoServlet";
+        URL = "RegistrazioneGestoreCampettoServlet";
 
         inputNome = (EditText) findViewById(R.id.input_nome_gestore);
         inputCognome = (EditText) findViewById(R.id.input_cognome_gestore);
@@ -59,9 +58,65 @@ public class RegistrationActivityGestore extends AppCompatActivity {
                     Toast.makeText(RegistrationActivityGestore.this, "Registrazione fallita", Toast.LENGTH_SHORT).show();
                 } else { //se i campi sono inseriti bene
                     // Avvia un compito asincrono
-                    RegistrazioneTask task = new RegistrazioneTask();
+                    ConnectionTask task = new ConnectionTask(URL, getApplicationContext()) {
+                        @Override
+                        protected void inviaDatiAlServer() {
+                            try {
+                                //Invio json al server--------------------
+                                OutputStream os = getConnessione().getOutputStream();
+                                OutputStreamWriter osw = new OutputStreamWriter(os);
+                                BufferedWriter bw = new BufferedWriter(osw);
+
+
+                                //Json Campetto da inviare
+                                JsonObject obj = new JsonObject();
+
+                                obj.addProperty("nome", inputNomeCampetto.getText().toString());
+                                obj.addProperty("tariffa", inputTariffaCampetto.getText().toString());
+                                obj.addProperty("citta", inputCittàCampetto.getText().toString());
+                                String sendMessage = obj.toString() + "\n";
+                                bw.write(sendMessage);
+
+                                //Json Gestore da inviare
+                                JsonObject obj1 = new JsonObject();
+
+                                obj1.addProperty("email", inputEmail.getText().toString());
+                                obj1.addProperty("password", inputPassword.getText().toString());
+                                obj1.addProperty("nome", inputNome.getText().toString());
+                                obj1.addProperty("cognome", inputCognome.getText().toString());
+                                obj1.addProperty("username", inputUsername.getText().toString());
+
+
+                                String sendMessage1 = obj1.toString() + "\n";
+                                bw.write(sendMessage1);
+
+
+                                bw.flush();
+                                System.out.println("Message sent to the server : " + sendMessage);
+                                System.out.println("Message sent to the server : " + sendMessage1);
+
+                            }catch (Exception ex) {
+                                ex.printStackTrace();}
+                        }
+
+                        @Override
+                        protected void gestisciRispostaServer() {
+                            //Se la registrazione è andata a buon fine allora vai al menu gestore
+                            if (getOutputDalServer().get(0).equals("Registrazione terminata con successo")) {
+                                //Salva dati corretti
+                                SharedPreferences.Editor editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
+                                editor.putString("MyEmail", inputEmail.getText().toString());
+                                editor.putString("Mypwd", inputPassword.getText().toString());
+                                editor.putBoolean("IamGestore", false);
+                                editor.apply();
+
+                                Toast.makeText(RegistrationActivityGestore.this, "Registrazione avvenuta con successo!\nAttenda che i nostri addetti verifichino l'agibilità del campetto specificato prima di riaccedere al sistema.", Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        }
+                    };
                     //Avvia il task asyncrono sull'url specificato
-                    task.execute(new String[]{URL});
+                    task.execute();
 
                 }
             }
@@ -120,124 +175,6 @@ public class RegistrationActivityGestore extends AppCompatActivity {
         }
 
         return controllo;
-    }
-
-    private class RegistrazioneTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-
-            String output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-
-        }
-
-        //Ricevi dati da Server
-        private String getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-                while ((s = buffer.readLine()) != null)
-                    output.append(s);
-
-                System.out.println(output.toString());
-
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return output.toString();
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            java.net.URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                httpConnection.connect();
-
-                //Invio json al server--------------------
-                OutputStream os = httpConnection.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(os);
-                BufferedWriter bw = new BufferedWriter(osw);
-
-
-                //Json Campetto da inviare
-                JsonObject obj = new JsonObject();
-
-                obj.addProperty("nome", inputNomeCampetto.getText().toString());
-                obj.addProperty("tariffa", inputTariffaCampetto.getText().toString());
-                obj.addProperty("citta", inputCittàCampetto.getText().toString());
-                String sendMessage = obj.toString() + "\n";
-                bw.write(sendMessage);
-
-                //Json Gestore da inviare
-                JsonObject obj1 = new JsonObject();
-
-                obj1.addProperty("email", inputEmail.getText().toString());
-                obj1.addProperty("password", inputPassword.getText().toString());
-                obj1.addProperty("nome", inputNome.getText().toString());
-                obj1.addProperty("cognome", inputCognome.getText().toString());
-                obj1.addProperty("username", inputUsername.getText().toString());
-
-
-                String sendMessage1 = obj1.toString() + "\n";
-                bw.write(sendMessage1);
-
-
-
-                bw.flush();
-                System.out.println("Message sent to the server : " + sendMessage);
-                System.out.println("Message sent to the server : " + sendMessage1);
-
-                //-------------------------------------------------
-
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            return stream;
-        }
-
-
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(String output) {
-
-            System.out.println("Ecco:"+output);
-            //Se la registrazione è andata a buon fine allora vai al menu atleta
-            if (output.equals("Registrazione terminata con successo")) {
-                //Salva dati corretti
-                SharedPreferences.Editor editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
-                editor.putString("MyEmail", inputEmail.getText().toString());
-                editor.putString("Mypwd", inputPassword.getText().toString() );
-                editor.putBoolean("IamAtleta", false);
-                editor.apply();
-
-                Toast.makeText(RegistrationActivityGestore.this, "Registrazione avvenuta con successo!\nAttenda che i nostri addetti verifichino l'agibilità del campetto specificato prima di riaccedere al sistema.", Toast.LENGTH_LONG).show();
-                finish();
-            }
-
-        }
-
-
     }
 
 }

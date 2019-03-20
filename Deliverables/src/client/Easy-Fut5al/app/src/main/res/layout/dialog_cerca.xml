@@ -11,9 +11,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:text= "Cerca partite nella località specificata"
+        android:text= "Cerca partite aperte nella località specificata"
         android:textColor="@color/colorAccent"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="italic"/>
 
     <LinearLayout

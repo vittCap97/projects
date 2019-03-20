@@ -10,6 +10,7 @@
 
 
 <LinearLayout
+    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -18,7 +19,7 @@
         android:id="@+id/titolo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lista Partite pubbliche"
+        android:text="Lista partite pubbliche"
         android:textStyle="bold"
         android:textColor="@color/colorAccent"
         android:textSize="25dp"
@@ -26,6 +27,12 @@
         android:layout_gravity="center"
 
         />
+
+    <ImageView
+        android:layout_width="40sp"
+        android:layout_height="35sp"
+        android:background="@drawable/right"
+        android:paddingLeft="3sp" />
 
 </LinearLayout>
 

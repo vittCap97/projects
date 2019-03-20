@@ -6,7 +6,7 @@
     <item
         android:id="@+id/action_notifica"
         android:layout_height="wrap_content"
-        android:icon="@drawable/ic_notifications_yellow_24dp"
+        android:icon="@drawable/ic_notifications_black_24dp"
         android:orderInCategory="100"
         android:title="notifica"
         app:showAsAction="always" />

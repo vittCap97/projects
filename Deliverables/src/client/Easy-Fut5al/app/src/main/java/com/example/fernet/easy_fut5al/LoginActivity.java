@@ -422,7 +422,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //Salva dati Login corretti
                 editor.putString("MyEmail", mEmail );
                 editor.putString("Mypwd", mPassword);
-                editor.putBoolean("IamAtleta", false);
+                editor.putBoolean("IamGestore", false);
                 editor.apply();
 
                 Intent openActivityGestore=new Intent(LoginActivity.this,ActivityGestore.class);

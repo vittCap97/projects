@@ -44,6 +44,8 @@ import static android.content.Context.MODE_PRIVATE;
 public class FragmentCalendario extends Fragment {
 
     public static  String URL;
+    public static  String URL2;
+
     private  AutoCompleteTextView casella;
     private ArrayList<String> partite;
     private CalendarView calendario;
@@ -54,13 +56,17 @@ public class FragmentCalendario extends Fragment {
     private static String orario;
     private static boolean Disponibilitaorario;
     private static Fragment FragmentFather;
+    private boolean campettofissato;
+    private String NomeCampettoFissato;
 
     public FragmentCalendario(){
         modalitaPrenota = false;
         Disponibilitaorario = false;
+        campettofissato = false;
     }
 
     public static FragmentCalendario newInstance(boolean descrizionevisibile, String orarioDatoInInput, Fragment padre ) {
+
 
         FragmentCalendario fragment = new FragmentCalendario();
         modalitaPrenota = descrizionevisibile;
@@ -76,10 +82,48 @@ public class FragmentCalendario extends Fragment {
 
 
 
+    //Per gestore
+    public void fissaCampetto(String CampettoSpecificato){
+        campettofissato = true;
+        NomeCampettoFissato = CampettoSpecificato;
+
+    }
+
+
+
+    public void trovaPartite(){
+        ConnectionTask task1 = new ConnectionTask(URL2, getActivity().getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+                try {
+                    //ricava nome utente
+                    SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                    String Email = prefs.getString("MyEmail", null);
+                    String data = "tipo_partite=DaGiocare&miapartecipazione=indifferente&MyEmail="+Email;
+                    getConnessione().setDoOutput(true);//abilita la scrittura
+                    OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                    wr.write(data);//scrittura del content
+                    wr.flush();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+            @Override
+            protected void gestisciRispostaServer() {
+                partite = getOutputDalServer();
+            }
+        };
+        task1.execute();
+    }
+
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        URL = "GetInfoServlet";
+        URL2 = "CercaPartiteServlet";
         View v = inflater.inflate(R.layout.calendario, container, false);
         titolo = v.findViewById(R.id.TitoloCalendario);
         descrizione = v.findViewById(R.id.descrizione);
@@ -89,6 +133,18 @@ public class FragmentCalendario extends Fragment {
         calendario.setVisibility(View.GONE);
         griglia = v.findViewById(R.id.Griglia);
         griglia.setVisibility(View.GONE);
+
+        trovaPartite();
+
+        if(campettofissato){
+            casella.setText(NomeCampettoFissato);
+            casella.setEnabled(false);
+            calendario.setVisibility(View.VISIBLE);
+            griglia.setVisibility(View.VISIBLE);
+
+        }
+
+
 
         if(modalitaPrenota == true) oscuraDescrizioni();
 
@@ -111,6 +167,7 @@ public class FragmentCalendario extends Fragment {
         casella.setOnFocusChangeListener(new View.OnFocusChangeListener(){
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+                trovaPartite();
                 if(hasFocus) casella.showDropDown();
             }
         });
@@ -118,6 +175,7 @@ public class FragmentCalendario extends Fragment {
         calendario.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
                 @Override
                 public void onSelectedDayChange(CalendarView calendarView, int i, int i1, int i2) {
+                    trovaPartite();
 
                     int anno = i;
                     String mese = String.format("%02d", i1+1);
@@ -169,10 +227,27 @@ public class FragmentCalendario extends Fragment {
 
                 }
             });
-        getInfoTask task = new getInfoTask();
-        SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-        URL = prefs.getString("URLserver", null) + "/EasyFut5al/GetInfoServlet";
-        task.execute(new String[] {URL});
+        ConnectionTask task = new ConnectionTask(URL,getActivity().getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+                try {
+                    String data = "tipo_oggetto=Campetto";
+                    getConnessione().setDoOutput(true);//abilita la scrittura
+                    OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                    wr.write(data);//scrittura del content
+                    wr.flush();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+
+            @Override
+            protected void gestisciRispostaServer() {
+                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_element, R.id.textViewList,  getOutputDalServer());
+                casella.setAdapter(arrayAdapter);
+            }
+        };
+        task.execute();
 
         return v;
     }
@@ -187,93 +262,11 @@ public class FragmentCalendario extends Fragment {
 
 
 
-
-
-    private class getInfoTask extends AsyncTask<String, Void, ArrayList<String> > {
-
-
-
-        @Override
-        protected ArrayList<String> doInBackground(String... urls) {
-            ArrayList<String> output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        //Ricevi dati da Server
-        private ArrayList<String> getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            ArrayList<String> Partite = new ArrayList<String>();
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-
-                while ((s = buffer.readLine()) != null)
-                    Partite.add(s);
-
-                stream.close();
-
-                int i = 1;
-                for (String a : Partite) {
-                    System.out.println(i + " Campetti: " + a);
-                    i++;
-                }
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return Partite;
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                String data = "tipo_oggetto=Campetto";
-                connection.setDoOutput(true);//abilita la scrittura
-                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-                wr.write(data);//scrittura del content
-                wr.flush();
-                httpConnection.connect();
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(ArrayList<String> output) {
-
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_element, R.id.textViewList,  output);
-            casella.setAdapter(arrayAdapter);
-
-
-        }
-    }
-    //---------------------------------------------
-
     public ArrayList<String> OrariOccupatiXcampetto(String CampettoScelto, String DataScelta) {
 
         ArrayList<String>  OrariOccupati = new ArrayList<>();
 
-        //Leggi file con le partite(prese dall'asynch task.....(si modificherà in modo che prenda anche quelle sicure))
+        /*Leggi file con le partite(prese dall'asynch task.....(si modificherà in modo che prenda anche quelle sicure))
         try {
             FileInputStream fis = getActivity().getApplicationContext().openFileInput("Partite");
             ObjectInputStream is = new ObjectInputStream(fis);
@@ -284,7 +277,7 @@ public class FragmentCalendario extends Fragment {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
 
         for (String partita : partite ) {
             if(!partita.isEmpty()) {

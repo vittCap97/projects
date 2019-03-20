@@ -1,4 +1,5 @@
 package com.example.fernet.easy_fut5al;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 
@@ -22,6 +23,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,6 +37,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class ActivityAtleta extends AppCompatActivity implements DialogCercaPartita.Communicator{
@@ -46,9 +56,13 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
     private MenuItem email;
     private String queryCitta;
     private SharedPreferences.Editor editor;
+    private String partitaScelta;
+    private static String URL = "UniscitiServlet";
+    private DialogVisualizzaInviti dialog;
+    private ArrayList<JsonObject> inviti;
 
 
-//Menu in basso
+    //Menu in basso
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override //Al click di un item del menu in basso
@@ -78,6 +92,8 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
                     return true;
 
                 case R.id.navigation_profilo:
+                    frammentoCorrenteVisualizzato = new Profilo();
+                    fm.beginTransaction().add(R.id.frammento, frammentoCorrenteVisualizzato).commit();
                     return true;
 
                 case R.id.navigation_search:
@@ -97,10 +113,9 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_atleta);
 
+
         editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
         viewAllMatch();
-
-
 
         fm = getFragmentManager();
         FrameLayout frame = findViewById(R.id.frammento);
@@ -112,6 +127,66 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         aggiornaHome();
+
+        //Inizia l'abilitazione alla ricezione inviti
+        inviti = new ArrayList<>();
+        Timer timerObj = new Timer();
+        TimerTask controlloNotifiche = new TimerTask() {
+
+            public void run() {
+                @SuppressLint("StaticFieldLeak") ConnectionTask task = new ConnectionTask("CheckInvitiServlet",getApplicationContext()) {
+                    @Override
+                    protected void inviaDatiAlServer() {
+                        try {
+                            getConnessione().setDoOutput(true);//abilita la scrittura
+                            OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+
+                            //Spedisci nome atleta
+                            SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                            String Email = prefs.getString("MyEmail", null);
+                            wr.write(Email+"\n");
+
+                            //Spedisci codice partita scelta
+                            wr.write(partitaScelta+"\n");
+
+                            wr.flush();
+
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    protected void gestisciRispostaServer() {
+
+                        if(getOutputDalServer()==null) return;
+
+                        //ho degli inviti, si dovrebbe illuminare
+
+
+                        for (String invito : getOutputDalServer()) {
+                            JsonObject jsonObject;
+                            try {
+                                jsonObject = new JsonParser().parse(invito).getAsJsonObject();
+                            } catch (Exception e) {
+                                jsonObject = null;
+                            }
+
+                            if (jsonObject != null) {
+                                if (!inviti.contains(jsonObject)){ //se non è un invito che ho già trovato.. aggiungo agli inviti
+                                    inviti.add(jsonObject);
+                                   if(iconaNotifica!=null) iconaNotifica.setIcon(getResources().getDrawable(R.drawable.ic_notifications_yellow_24dp));
+
+                                }
+                            }
+                        }
+                        dialog =new DialogVisualizzaInviti(ActivityAtleta.this, inviti);
+                    }};
+                task.execute();
+            }
+        };
+        timerObj.schedule(controlloNotifiche, 0, 60000); //Controlla una volta al minutp
+
 
     }
 
@@ -146,6 +221,7 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
         if (id == R.id.action_notifica) {
             System.out.println("Controlla notificheee");
             iconaNotifica.setIcon(getResources().getDrawable(R.drawable.ic_notifications_black_24dp));
+            dialog.show();
         }
 
         if(id == R.id.logout){
@@ -186,11 +262,9 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
 
     public void  aggiornaHome(){
         //Aggiorna home
-        mViewPager = (ViewPager) findViewById(R.id.sezione);
+        mViewPager =  findViewById(R.id.sezione);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
-
     }
 
     public void viewAllMatch(){
@@ -202,105 +276,42 @@ public class ActivityAtleta extends AppCompatActivity implements DialogCercaPart
     //Funzione associata al tasto UNISCITI
     public void uniscitiPartitaPubblica(View view) {
 
-        UniscitiTask task = new UniscitiTask(view.getTag());
-        SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-        String URL = prefs.getString("URLserver", null) + "/EasyFut5al/UniscitiServlet";
-        task.execute(new String[] {URL});
-    }
+        partitaScelta = (String) view.getTag();
 
+        ConnectionTask task = new ConnectionTask(URL,getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+                try {
+                    getConnessione().setDoOutput(true);//abilita la scrittura
+                    OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
 
+                    //Spedisci nome atleta
+                    SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                    String Email = prefs.getString("MyEmail", null);
+                    wr.write(Email+"\n");
 
-    //------------------------------------------------------------------------------
+                    //Spedisci codice partita scelta
+                    wr.write(partitaScelta+"\n");
 
-    private class  UniscitiTask extends AsyncTask<String, Void, String > {
+                    wr.flush();
 
-        private String partitaScelta;
-
-        public UniscitiTask(Object tag) {
-             partitaScelta = (String) tag;
-        }
-
-        @Override
-        protected String doInBackground(String... urls) {
-            String output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        //Ricevi dati da Server
-        private String getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            String esito= null;
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-
-                esito = buffer.readLine();
-
-                stream.close();
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return esito;
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-
-                connection.setDoOutput(true);//abilita la scrittura
-                OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-
-                //Spedisci nome atleta
-                SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-                String Email = prefs.getString("MyEmail", null);
-                wr.write(Email+"\n");
-
-                //Spedisci codice partita scelta
-                wr.write(partitaScelta+"\n");
-
-                wr.flush();
-
-
-                httpConnection.connect();
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
+                }catch (Exception ex){
+                    ex.printStackTrace();
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
-            return stream;
-        }
 
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(String output) {
-            System.out.println("Risposta del server:"+output+"|");
-            if(output.equals("Operazione terminata con successo!")){
-                Toast.makeText(ActivityAtleta.this,"Ti sei unito alla partita!", Toast.LENGTH_LONG).show();
+            @Override
+            protected void gestisciRispostaServer() {
+                System.out.println("Risposta del server:"+getOutputDalServer().get(0)+"|");
+                if(getOutputDalServer().get(0).equals("Operazione terminata con successo!")){
+                    Toast.makeText(ActivityAtleta.this,"Ti sei unito alla partita!", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(ActivityAtleta.this, "Impossibile unirsi alla partita, già partecipi a questa partita per caso?", Toast.LENGTH_LONG).show();
+                }
             }
-            else{
-                Toast.makeText(ActivityAtleta.this, "Impossibile unirsi alla partita, già partecipi a questa partita per caso?", Toast.LENGTH_LONG).show();
-            }
-        }
+        };
+        task.execute();
     }
-
-
-
-
-    //-------------------------------------------------------------------------------
 }
+

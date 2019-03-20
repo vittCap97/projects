@@ -34,7 +34,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     //La position(numero scheda) ha senso solo se si sceglie il menu principale come item
     public Fragment getItem(int position) {
 
-            return SezioneHome.newInstance(position+1);
+        return SezioneHome.newInstance(position);
 
 
     }

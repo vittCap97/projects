@@ -1,56 +1,29 @@
 package com.example.fernet.easy_fut5al;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ExpandableListAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import android.content.SharedPreferences;
-import android.preference.Preference;
-import android.widget.ToggleButton;
 
 import static android.content.Context.MODE_PRIVATE;
-import static java.lang.System.*;
+import static java.lang.Thread.sleep;
 
 public  class SezioneHome extends  Fragment{
 
@@ -61,7 +34,13 @@ public  class SezioneHome extends  Fragment{
     private static final String ARG_SECTION_NUMBER = "section_number";
     public ListView listView;
     public ArrayList<JsonObject> partite;
-    public static  String URL;
+    public ArrayList<JsonObject> Miepartite;
+    private ArrayList<JsonObject> Miepartiteterminate;
+
+    public static  String URL = "CercaPartiteServlet";
+    private LayoutInflater Inflater;
+    private ViewGroup Container;
+    private static int pagina=0;
 
     public SezioneHome() {
 
@@ -72,7 +51,6 @@ public  class SezioneHome extends  Fragment{
      * number.
      */
     public static SezioneHome newInstance(int sectionNumber) {
-
         SezioneHome fragment = new SezioneHome();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -84,31 +62,195 @@ public  class SezioneHome extends  Fragment{
     }
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View rootView = null;
 
+
+        View rootView = null;
+       Inflater = inflater;
+       Container = container;
+
+        System.out.println("pagina "+pagina);
 
         //Faccio visualizzare solo la scheda che mi interessa(quella selezionata)
        //Se è la prima scheda
-        if(getArguments().getInt(ARG_SECTION_NUMBER)==1) {
+        if(getArguments().getInt(ARG_SECTION_NUMBER)==0) {
             partite = new ArrayList<>();
-            CercaPartitePubblicheTask task = new CercaPartitePubblicheTask(inflater,container);
+            ConnectionTask task = new ConnectionTask(URL, getActivity().getApplicationContext()) {
+                @Override
+                protected void inviaDatiAlServer() {
+                    try {
+                        //ricava nome utente
+                        SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                        String Email = prefs.getString("MyEmail", null);
+                        String data = "tipo_partite=InSospeso&miapartecipazione=no&MyEmail="+Email;
 
-            SharedPreferences prefs = getContext().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-            URL = prefs.getString("URLserver", null) + "/EasyFut5al/CercaPartiteServlet";
+                        getConnessione().setDoOutput(true);//abilita la scrittura
+                        OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                        wr.write(data);//scrittura del content
+                        wr.flush();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
 
-            task.execute(new String[] {URL});
+                @Override
+                protected void gestisciRispostaServer() {
+
+                    if(getOutputDalServer()==null) {
+                        Toast.makeText(getActivity().getApplicationContext(), "Nessuna partita trovata", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    /* Salvare file con partite trovate
+                    try {
+                        FileOutputStream fos = getContext().openFileOutput("Partite", Context.MODE_PRIVATE);
+                        ObjectOutputStream os = new ObjectOutputStream(fos);
+                        os.writeObject(getOutputDalServer());
+                        os.close();
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }*/
+
+                    SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                    String CittaChevoglio = prefs.getString("queryCittaPartita", null);
+
+
+                    for (String partita : getOutputDalServer()) {
+                        JsonObject jsonObject;
+                        try {
+                            jsonObject = new JsonParser().parse(partita).getAsJsonObject();
+                        } catch (Exception e) {
+                            jsonObject = null;
+                        }
+
+                        if (jsonObject != null) {
+                            String NomeCampettoCorrente = jsonObject.get("Citta").toString();
+                            NomeCampettoCorrente = NomeCampettoCorrente.substring(1, NomeCampettoCorrente.length() - 1);
+
+                            if (CittaChevoglio.equals(NomeCampettoCorrente) || CittaChevoglio.length() == 0)
+                                partite.add(jsonObject);
+
+                        }
+                    }
+                    listView = Inflater.inflate(R.layout.sezione_partite_pubbliche, Container).findViewById(R.id.lista_partite_pubbliche);
+                    CustomAdapter customAdapter = new CustomAdapter(getContext(), R.layout.list_elem_partita, partite, true);
+                    listView.setAdapter(customAdapter); //Magari questa operazione la faccio dentro al task asincrono
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            String str = listView.getItemAtPosition(position).toString();
+                            //Fai qualcosa
+                        }
+                    });
+                }
+            };
+            task.execute();
             //Visualizz partite pubbliche
             rootView = inflater.inflate(R.layout.sezione_partite_pubbliche, container, false);
-
         }
 
+
         //Se è la seconda scheda
-        else{
-            rootView = inflater.inflate(R.layout.activity_main, container, false);
+        if(getArguments().getInt(ARG_SECTION_NUMBER)==1) {
+            Miepartiteterminate = new ArrayList<>();
+            Miepartite = new ArrayList<>();
+
+            ConnectionTask task2 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
+                @Override
+                protected void inviaDatiAlServer() {
+                    try {
+                        //ricava nome utente
+                        SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                        String Email = prefs.getString("MyEmail", null);
+                        String data = "tipo_partite=InSospeso&miapartecipazione=si&MyEmail="+Email;
+
+                        getConnessione().setDoOutput(true);//abilita la scrittura
+                        OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                        wr.write(data);//scrittura del content
+                        wr.flush();
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+
+                @Override
+                protected void gestisciRispostaServer() {
+
+                    if(getOutputDalServer()==null) {
+                        Toast.makeText(getActivity().getApplicationContext(), "Nessuna partita trovata", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    for (String partita : getOutputDalServer()) {
+                        JsonObject jsonObject;
+                        try {
+                            jsonObject = new JsonParser().parse(partita).getAsJsonObject();
+                        } catch (Exception e) {
+                            jsonObject = null;
+                        }
+
+                        if (jsonObject != null) Miepartite.add(jsonObject);
+
+                    }
+                    listView = Inflater.inflate(R.layout.mie_partite, Container).findViewById(R.id.partite_inCorso);
+                    CustomAdapter customAdapter = new CustomAdapter(getContext(), R.layout.list_elem_partita, Miepartite, false);
+                    listView.setAdapter(customAdapter); //Magari questa operazione la faccio dentro al task asincrono
+
+
+            }};
+
+            ConnectionTask task3 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
+                @Override
+                protected void inviaDatiAlServer() {
+                    try {
+                        //ricava nome utente
+                        SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                        String Email = prefs.getString("MyEmail", null);
+                        String data = "tipo_partite=Terminata&miapartecipazione=si&MyEmail="+Email;
+
+                        getConnessione().setDoOutput(true);//abilita la scrittura
+                        OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                        wr.write(data);//scrittura del content
+                        wr.flush();
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+
+                @Override
+                protected void gestisciRispostaServer() {
+
+                    if(getOutputDalServer()==null) {
+                        Toast.makeText(getActivity().getApplicationContext(), "Nessuna partita trovata", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    for (String partita : getOutputDalServer()) {
+                        JsonObject jsonObject;
+                        try {
+                            jsonObject = new JsonParser().parse(partita).getAsJsonObject();
+                        } catch (Exception e) {
+                            jsonObject = null;
+                        }
+
+                        if (jsonObject != null) Miepartiteterminate.add(jsonObject);
+
+                    }
+                    listView = Inflater.inflate(R.layout.mie_partite, Container).findViewById(R.id.lista_partite_giocate);
+                    AdapterEndGame Adapter = new AdapterEndGame(getContext(), R.layout.list_elem_partite_davalutare, Miepartiteterminate);
+                    listView.setAdapter(Adapter); //Magari questa operazione la faccio dentro al task asincrono
+
+
+                }};
+            task2.execute();
+            task3.execute();
+
+            rootView = inflater.inflate(R.layout.mie_partite, container, false);
         }
 
         return rootView;
@@ -118,147 +260,21 @@ public  class SezioneHome extends  Fragment{
 
 
 
-    //++++++++++++++++++++++++++++++++++++++++++++++++
-    private class CercaPartitePubblicheTask extends AsyncTask<String, Void, ArrayList<String> > {
-
-        private LayoutInflater inflater;
-        public ViewGroup container;
-
-
-        public CercaPartitePubblicheTask(LayoutInflater inflater, ViewGroup container) {
-            this.inflater = inflater;
-            this.container = container;
-        }
-
-
-        @Override
-        protected ArrayList<String> doInBackground(String... urls) {
-            ArrayList<String> output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-        }
-
-        //Ricevi dati da Server
-        private ArrayList<String> getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            ArrayList<String> Partite = new ArrayList<String>();
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-                //ricezione stringhe json
-                while ((s = buffer.readLine()) != null)
-                    Partite.add(s);
-
-                stream.close();
-
-                int i = 1;
-                for (String a : Partite) {
-                    out.println(i + " partita pubblica: " + a);
-                    i++;
-                }
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return Partite;
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                httpConnection.connect();
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(ArrayList<String> output) {
-
-
-            // Salvare file con partite trovate
-            try {
-                FileOutputStream fos = getContext().openFileOutput("Partite", Context.MODE_PRIVATE);
-                ObjectOutputStream os = new ObjectOutputStream(fos);
-                os.writeObject(output);
-                os.close();
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-            SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-            String CittaChevoglio = prefs.getString("queryCittaPartita", null);
-
-
-            for (String partita : output) {
-                JsonObject jsonObject;
-                try {
-                    jsonObject = new JsonParser().parse(partita).getAsJsonObject();
-                } catch (Exception e) {
-                    out.println("Partita Vuota");
-                    jsonObject = null;
-                }
-
-                if (jsonObject != null) {
-                    String NomeCampettoCorrente = jsonObject.get("Citta").toString();
-                    NomeCampettoCorrente = NomeCampettoCorrente.substring(1, NomeCampettoCorrente.length() - 1);
-
-                    if (CittaChevoglio.equals(NomeCampettoCorrente) || CittaChevoglio.length() == 0)
-                        partite.add(jsonObject);
-
-                }
-            }
-
-            listView = inflater.inflate(R.layout.sezione_partite_pubbliche, container).findViewById(R.id.lista_partite_pubbliche);
-            out.println("MMMMh " + partite);
-            CustomAdapter customAdapter = new CustomAdapter(getContext(), R.layout.list_elem_partita, partite);
-            listView.setAdapter(customAdapter); //Magari questa operazione la faccio dentro al task asincrono
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String str = listView.getItemAtPosition(position).toString();
-                    //Fai qualcosa
-                }
-            });
-
-        }
-    }
-    //---------------------------------------------
-
-
 class CustomAdapter extends ArrayAdapter<JsonObject> {
     private int resource;
     private LayoutInflater inflater;
+    private boolean mod_unisciti;
 
-    public CustomAdapter(Context context, int resourceId, List<JsonObject> objects) {
+    public CustomAdapter(Context context, int resourceId, List<JsonObject> objects, boolean modUnisciti) {
         super(context, resourceId, objects);
         resource = resourceId;
         inflater = LayoutInflater.from(context);
+        mod_unisciti = modUnisciti;
     }
 
     @Override
     public View getView(int position, View v, ViewGroup parent) {
         if (v == null) {
-            Log.d("DEBUG","Inflating view");
             v = inflater.inflate(R.layout.list_elem_partita, null);
 
         }
@@ -272,12 +288,22 @@ class CustomAdapter extends ArrayAdapter<JsonObject> {
         TextView citta;
         TextView tariffa;
         TextView data;
-        Button unisciti;
+        final Button unisciti;
+
 
         //Così quando premerò unisciti avrò un riferimento alla partita
         unisciti = v.findViewById(R.id.tastoUnisciti);
         unisciti.setTag(p.get("CodicePartita").getAsString());
 
+        //Modalità rimuovi anziché unisciti
+        if(!mod_unisciti){
+            unisciti.setText("Dai forfait");
+            unisciti.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v)
+                {
+                    daiForfait(unisciti.getTag());
+                }
+            });}
 
         nomeCampetto = v.findViewById(R.id.nome_campo);
         ora = v.findViewById(R.id.ora);
@@ -298,4 +324,121 @@ class CustomAdapter extends ArrayAdapter<JsonObject> {
 
         return v;
     }
-}}
+
+
+
+    private void daiForfait(final Object tag) {
+        String URL = "ForfaitServlet";
+        ConnectionTask task3 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+                try {
+                    //ricava nome utente
+                    SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                    String Email = prefs.getString("MyEmail", null);
+                    String data = "partita="+tag.toString()+"&MyEmail="+Email;
+
+                    getConnessione().setDoOutput(true);//abilita la scrittura
+                    OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                    wr.write(data);//scrittura del content
+                    wr.flush();
+
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+
+            @Override
+            protected void gestisciRispostaServer() {
+                if(getOutputDalServer().get(0).equals("Rimozione completata"))
+                    Toast.makeText(getActivity().getApplicationContext(), "Hai appena dato buca alla partita!", Toast.LENGTH_LONG).show();
+                else Toast.makeText(getActivity().getApplicationContext(), "Ops, abbiamo riscontrato un problema", Toast.LENGTH_LONG).show();
+
+            }};
+        task3.execute();
+    }
+}
+
+
+
+    class AdapterEndGame extends ArrayAdapter<JsonObject> {
+        private int resource;
+        private LayoutInflater inflater;
+        private boolean mod_unisciti;
+
+        public AdapterEndGame(Context context, int resourceId, List<JsonObject> objects) {
+            super(context, resourceId, objects);
+            resource = resourceId;
+            inflater = LayoutInflater.from(context);
+        }
+
+        @Override
+        public View getView(int position, View v, ViewGroup parent) {
+            if (v == null) {
+                v = inflater.inflate(R.layout.list_elem_partite_davalutare, null);
+
+            }
+
+            final JsonObject p = getItem(position);
+
+            final TextView nomeCampetto;
+            TextView ora;
+            TextView codice;
+            TextView citta;
+            TextView tariffa;
+            TextView data;
+            RatingBar valutazione;
+
+            nomeCampetto = v.findViewById(R.id.nome_campo);
+            ora = v.findViewById(R.id.ora);
+            codice = v.findViewById(R.id.cod_partita);
+            citta = v.findViewById(R.id.citta);
+            tariffa = v.findViewById(R.id.Tariffa);
+            data = v.findViewById(R.id.data);
+            valutazione = v.findViewById(R.id.ratingBar);
+
+
+            nomeCampetto.setText(p.get("NomeCampetto").getAsString());
+            ora.setText("Ore\n" + p.get("Ora").getAsString());
+            codice.setText("cod. partita:" + p.get("CodicePartita").getAsString());
+            citta.setText(p.get("Citta").getAsString());
+            tariffa.setText("Quota singola:" + p.get("Tariffa").getAsString());
+            data.setText(p.get("Data").getAsString());
+
+            valutazione = (RatingBar) v.findViewById(R.id.ratingBar);
+            valutazione.setMax(5);
+            valutazione.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+
+                @Override
+                public void onRatingChanged(RatingBar ratingBar, final float rating,
+                                            boolean fromUser) {
+                    ConnectionTask taskValuta = new ConnectionTask("ValutaCampettoServlet", getActivity().getApplicationContext()) {
+                        @Override
+                        protected void inviaDatiAlServer() {
+                            try {
+                                String data = "valutazione="+String.valueOf((int) rating)+"&campetto="+p.get("NomeCampetto").getAsString();
+                                getConnessione().setDoOutput(true);//abilita la scrittura
+                                OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                                wr.write(data);//scrittura del content
+                                wr.flush();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+                        }
+                        @Override
+                        protected void gestisciRispostaServer() {
+                            if(getOutputDalServer().get(0).equals("operazione completata"))
+                                Toast.makeText(getActivity().getApplicationContext(), "Valutazione inviata!", Toast.LENGTH_LONG).show();
+                        }
+                    };
+                    taskValuta.execute();
+
+
+                }
+            });
+
+
+            return v;
+        }
+    }
+}

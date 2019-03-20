@@ -32,7 +32,6 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
     private boolean check;
     private EditText inputNome, inputCognome,inputUsername,inputCitta,inputDataNascita,inputRuolo, inputEmail, inputPassword, inputConfermaPassword;
     public static  String URL;
-    //public static final String URL = "http://192.168.1.14:8080/EasyFut5al/JsonServlet";
 
 
     @Override
@@ -40,8 +39,7 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration_atleta);
 
-        SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
-        URL = prefs.getString("URLserver", null) + "/EasyFut5al/RegistrazioneAtletaServlet";
+        URL = "RegistrazioneAtletaServlet";
 
 
         inputNome = (EditText) findViewById(R.id.input_nome);
@@ -67,9 +65,53 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
                 }
                 else{ //se i campi sono inseriti bene
                     // Avvia un compito asincrono
-                    RegistrazioneTask task = new RegistrazioneTask();
-                    //Avvia il task asyncrono sull'url specificato
-                    task.execute(new String[] { URL});
+                    ConnectionTask task = new ConnectionTask(URL, getApplicationContext()) {
+                        @Override
+                        protected void inviaDatiAlServer() {
+                            try {
+                                //Invio json al server--------------------
+                                OutputStream os = getConnessione().getOutputStream();
+                                OutputStreamWriter osw = new OutputStreamWriter(os);
+                                BufferedWriter bw = new BufferedWriter(osw);
+
+                                JsonObject obj = new JsonObject();
+                                obj.addProperty("email", inputEmail.getText().toString());
+                                obj.addProperty("password", inputPassword.getText().toString());
+                                obj.addProperty("nome", inputNome.getText().toString());
+                                obj.addProperty("cognome", inputCognome.getText().toString());
+                                obj.addProperty("data", inputDataNascita.getText().toString());
+                                obj.addProperty("residenza", inputCitta.getText().toString());
+                                obj.addProperty("ruolo", inputRuolo.getText().toString());
+                                obj.addProperty("username", inputUsername.getText().toString());
+
+
+                                String sendMessage = obj.toString() + "\n";
+                                bw.write(sendMessage);
+                                bw.flush();
+                                System.out.println("Message sent to the server : " + sendMessage);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        protected void gestisciRispostaServer() {
+
+                            //Se la registrazione è andata a buon fine allora vai al menu atleta
+                            if(getOutputDalServer().get(0).toString().equals("Registrazione terminata con successo")){
+                            //Salva dati corretti
+                            SharedPreferences.Editor editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
+                            editor.putString("MyEmail", inputEmail.getText().toString() );
+                            editor.putString("Mypwd", inputPassword.getText().toString() );
+                            editor.putBoolean("IamAtleta", true);
+                            editor.apply();
+
+                            Intent intentMain;
+                                intentMain = new Intent(RegistrationActivityAtleta.this,ActivityAtleta.class);
+                                startActivity(intentMain);}
+                        }
+                    };
+                    task.execute();
                 }
             }
         });
@@ -122,107 +164,5 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
 
         return controllo;
     }
-
-
-
-    private class RegistrazioneTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-
-            String output = null;
-            for (String url : urls) {
-                //Ricevi mex di riscontro dal Server di quell'URL
-                output = getOutputFromUrl(url);
-            }
-            return output;
-
-        }
-
-
-        //Ricevi dati da Server
-        private String getOutputFromUrl(String url) {
-            StringBuffer output = new StringBuffer("");
-            try {
-                InputStream stream = getHttpConnection(url);
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
-                String s = "";
-                while ((s = buffer.readLine()) != null)
-                    output.append(s);
-
-                System.out.println(output.toString());
-
-
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            return output.toString();
-        }
-
-        //Inizia una connessione Http e ritorna uno stream di input(CANALE DOVE LEGGERE DATI DAL SERVER)
-        private InputStream getHttpConnection(String urlString)
-                throws IOException {
-            InputStream stream = null;
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("POST");
-                httpConnection.connect();
-
-                //Invio json al server--------------------
-                OutputStream os = httpConnection.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(os);
-                BufferedWriter bw = new BufferedWriter(osw);
-
-                JsonObject obj = new JsonObject();
-                obj.addProperty("email", inputEmail.getText().toString());
-                obj.addProperty("password", inputPassword.getText().toString());
-                obj.addProperty("nome", inputNome.getText().toString());
-                obj.addProperty("cognome", inputCognome.getText().toString());
-                obj.addProperty("data", inputDataNascita.getText().toString());
-                obj.addProperty("residenza", inputCitta.getText().toString());
-                obj.addProperty("ruolo", inputRuolo.getText().toString());
-                obj.addProperty("username", inputUsername.getText().toString());
-
-
-                String sendMessage = obj.toString() + "\n";
-                bw.write(sendMessage);
-                bw.flush();
-                System.out.println("Message sent to the server : "+sendMessage);
-                //-------------------------------------------------
-
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return stream;
-        }
-
-
-        //lavora sui dati presi dal server, dopo l'esecuzione del compito asincrono
-        @Override
-        protected void onPostExecute(String output) {
-            //Se la registrazione è andata a buon fine allora vai al menu atleta
-            if(output.toString().equals("Registrazione terminata con successo")){
-
-                //Salva dati corretti
-                SharedPreferences.Editor editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
-                editor.putString("MyEmail", inputEmail.getText().toString() );
-                editor.putString("Mypwd", inputPassword.getText().toString() );
-                editor.putBoolean("IamAtleta", true);
-                editor.apply();
-
-                Intent intentMain=new Intent(RegistrationActivityAtleta.this,ActivityAtleta.class);
-                startActivity(intentMain);
-            }
-        }
-    }
-
-
 
 }

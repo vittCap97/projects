@@ -5,19 +5,62 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 
+import java.io.OutputStreamWriter;
 
 
 public class ActivityGestore extends AppCompatActivity {
 
     private MenuItem iconaNotifica;
     private MenuItem email;
+    private FrameLayout cal;
+    private FragmentCalendario calendario;
+
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gestore);
+
+
+
+        ConnectionTask task = new ConnectionTask("/GetCampettoServlet", getApplicationContext()) {
+            @Override
+            protected void inviaDatiAlServer() {
+                try {
+                    SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                    String Email = prefs.getString("MyEmail", null);
+
+                    String data = "myEmail="+Email;
+                    getConnessione().setDoOutput(true);//abilita la scrittura
+                    OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                    wr.write(data);//scrittura del content
+                    wr.flush();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+
+            @Override
+            protected void gestisciRispostaServer() {
+                if(!getOutputDalServer().get(0).equals("Errore")){
+                    cal = findViewById(R.id.calendary);
+                    cal.setVisibility(View.VISIBLE);
+                    calendario = FragmentCalendario.newInstance(false, null, null);
+                    getFragmentManager().beginTransaction().add(R.id.calendary, calendario).commit();
+                    calendario.fissaCampetto(getOutputDalServer().get(0));}
+
+            }
+        };
+        task.execute();
+
+
+
 
     }
 

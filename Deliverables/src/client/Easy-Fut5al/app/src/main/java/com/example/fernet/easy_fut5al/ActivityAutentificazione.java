@@ -23,7 +23,7 @@ public class ActivityAutentificazione extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        URLServer = "http://192.168.1.195:8080";
+        URLServer = "http://172.19.16.170:8080";
 
         SharedPreferences.Editor editor = getSharedPreferences("DatiApplicazione", MODE_PRIVATE).edit();
         editor.putString("URLserver", URLServer);
