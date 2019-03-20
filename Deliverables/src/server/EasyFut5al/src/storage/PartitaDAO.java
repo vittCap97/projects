@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -95,11 +96,34 @@ public class PartitaDAO implements Fut5alDAO {
 		return bean;
 	}
 
+	
+	
 	@Override
-	public synchronized  void update(Bean b) {
-		// TODO Auto-generated method stub
+	public synchronized  void update(Bean b) throws SQLException {
+		Connection connection = null;
+		Statement statement = null;
+
+		Partita c = (Partita) b;
 		
+
+		String query = "UPDATE " + TABLE_NAME+ " SET StatoPartita=\""+c.getStatoPartita().toString()+"\" WHERE ID ="+c.getID()+";";
+				
+		try {
+			connection = DriverManagerConnectionPool.getConnection();
+			statement = connection.createStatement();
+			statement.executeUpdate(query);
+			connection.commit();
+		} finally {
+			try {
+				if (statement != null)
+					statement.close();
+			} finally {
+				DriverManagerConnectionPool.releaseConnection(connection);
+			}
+		}		
 	}
+	
+	
 
 	@Override
 	public synchronized void add(Bean b) throws SQLException {

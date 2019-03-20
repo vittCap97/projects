@@ -116,7 +116,6 @@ public class CampettoDAO implements Fut5alDAO{
 		
 		System.out.println(query);
 		
-		Campetto a = (Campetto) b;
 		try {
 			connection = DriverManagerConnectionPool.getConnection();
 			statement = connection.createStatement();

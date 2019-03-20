@@ -136,11 +136,9 @@ new fadeshow(fadeimages, 960, 240, 1, 2000, 1, "R")
             <div class="cleaner"></div>
 			
             <div id="templatemo_footer">
-      			Copyright © 2048 <a href="#">Your Company Name</a> | <a href="http://www.iwebsitetemplate.com" target="_parent">Website Templates</a> by <a href="http://www.templatemo.com/page/1" target="_parent">Free CSS Templates</a>        
+      			Offerto da: Pierluigi Liguori & Vittorio Caparco       
 			</div>  
         </div>
     </div>
-<!--  Free CSS Templates by TemplateMo.com  -->
-<div>This template  downloaded form free website templates</div>
 </body>
 </html>

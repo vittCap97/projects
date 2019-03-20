@@ -212,7 +212,12 @@ public class StorageFacade{
 			break;
 			
 		case "storage.Partita":
-			partitaDao.update(b);
+			try {
+				partitaDao.update(b);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
 			
 			

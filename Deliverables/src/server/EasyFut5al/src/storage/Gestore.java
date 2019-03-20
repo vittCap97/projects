@@ -2,6 +2,10 @@ package storage;
 
 public class Gestore extends Bean{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2325798472262336420L;
 	private String email;
 	private String password;
 	private String nome;
