@@ -215,6 +215,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return email.contains("@");
     }
 
+
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 4;
@@ -422,7 +423,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //Salva dati Login corretti
                 editor.putString("MyEmail", mEmail );
                 editor.putString("Mypwd", mPassword);
-                editor.putBoolean("IamGestore", false);
+                editor.putBoolean("IamAtleta", false);
                 editor.apply();
 
                 Intent openActivityGestore=new Intent(LoginActivity.this,ActivityGestore.class);

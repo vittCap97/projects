@@ -1,17 +1,19 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:margin="http://schemas.android.com/apk/res-auto"
-    android:layout_gravity="center_horizontal"
-    tools:context="com.example.fernet.easy_fut5al.Profilo">
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
+<?xml version="1.0" encoding="utf-8"?>
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+    tools:context=".Profilo">
 
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="vertical">
         <TextView
             android:id="@+id/titolo"
             android:layout_width="wrap_content"
@@ -23,15 +25,29 @@
             android:layout_margin="5dp"
             android:layout_gravity="center" />
 
-    <TextView
-        android:textAlignment="center"
-        android:layout_margin="5dp"
-        android:textStyle="italic"
-        android:textColor="@color/colorAccent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tieni premuto sul campo da modificare"/>
 
+           <LinearLayout
+               android:id="@+id/aggiorna"
+               android:layout_gravity="center"
+               android:gravity="center"
+               android:layout_marginVertical="10dp"
+               android:orientation="horizontal"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:visibility="gone">
+
+               <EditText
+               android:id="@+id/casellaDiModifica"
+               android:layout_width="100dp"
+               android:layout_height="wrap_content" />
+
+           <Button
+               android:id="@+id/buttonAggiorna"
+               android:background="@drawable/background_button"
+               android:text="aggiorna"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content" />
+           </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -50,12 +66,13 @@
             android:text="Nome:"/>
 
         <TextView
+            android:id="@+id/Nome"
             android:layout_marginHorizontal="5dp"
             android:textSize="20sp"
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gennaro"/>
+            android:text=""/>
 
     </LinearLayout>
 
@@ -77,12 +94,13 @@
             android:text="Cognome:"/>
 
         <TextView
+            android:id="@+id/Cognome"
             android:layout_marginHorizontal="5dp"
             android:textSize="20sp"
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pappalardo"/>
+            android:text=""/>
 
     </LinearLayout>
 
@@ -101,15 +119,16 @@
             android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Username:"/>
+            android:text="Username"/>
 
         <TextView
+            android:id="@+id/Username"
             android:layout_marginHorizontal="5dp"
             android:textSize="20sp"
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="pappy99"/>
+            android:text=""/>
 
     </LinearLayout>
 
@@ -131,12 +150,13 @@
             android:text="Email:"/>
 
         <TextView
+            android:id="@+id/Email"
             android:layout_marginHorizontal="5dp"
             android:textSize="20sp"
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pappalardo@gmail.com"/>
+            android:text=""/>
 
     </LinearLayout>
 
@@ -159,18 +179,22 @@
             android:text="Password:"/>
 
         <TextView
+            android:id="@+id/Passord"
             android:layout_marginHorizontal="5dp"
             android:textSize="20sp"
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="****"/>
+            android:inputType="textPassword"
+            android:text=""/>
 
     </LinearLayout>
 
 
 
     <LinearLayout
+        android:id="@+id/sezioneAtleta"
+        android:visibility="gone"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -203,12 +227,13 @@
                 android:text="Data di nascita:"/>
 
             <TextView
+                android:id="@+id/DataDiNascita"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1995-12-12"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -230,12 +255,13 @@
                 android:text="Residenza:"/>
 
             <TextView
+                android:id="@+id/Citta"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Palomonte"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -258,12 +284,13 @@
                 android:text="Ruolo preferito:"/>
 
             <TextView
+                android:id="@+id/Ruolo"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Difensore"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -273,6 +300,8 @@
 
 
     <LinearLayout
+        android:id="@+id/sezioneGestore"
+        android:visibility="gone"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -305,12 +334,13 @@
                 android:text="Nome Campetto:"/>
 
             <TextView
+                android:id="@+id/NomeCampetto"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Golden field"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -331,12 +361,13 @@
                 android:text="Tariffa:"/>
 
             <TextView
+                android:id="@+id/Tariffa"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="50$"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -357,18 +388,20 @@
                 android:text="Valutazione:"/>
 
             <TextView
+                android:id="@+id/Valutazione"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="20sp"
                 android:textColor="@color/colorAccent"
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3"/>
+                android:text=""/>
 
         </LinearLayout>
 
 
     </LinearLayout>
-
     </LinearLayout>
+
+
 </ScrollView>

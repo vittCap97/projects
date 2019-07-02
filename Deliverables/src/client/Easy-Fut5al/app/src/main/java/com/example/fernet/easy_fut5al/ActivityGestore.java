@@ -2,6 +2,7 @@ package com.example.fernet.easy_fut5al;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,10 +15,12 @@ import java.io.OutputStreamWriter;
 
 public class ActivityGestore extends AppCompatActivity {
 
-    private MenuItem iconaNotifica;
+    private MenuItem iconaProfilo;
     private MenuItem email;
     private FrameLayout cal;
     private FragmentCalendario calendario;
+    private static boolean flag = true;
+    private MenuItem icon;
 
 
 
@@ -68,9 +71,10 @@ public class ActivityGestore extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main_gestore, menu);
 
-        iconaNotifica = menu.findItem(R.id.action_notifica);
+
+        iconaProfilo = menu.findItem(R.id.action_profilo);
 
         //ricava nome utente
         SharedPreferences prefs = getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
@@ -90,10 +94,24 @@ public class ActivityGestore extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //Al click della notifica
-        if (id == R.id.action_notifica) {
-            System.out.println("Controlla notificheee");
-            iconaNotifica.setIcon(getResources().getDrawable(R.drawable.ic_notifications_black_24dp));
+        //Al click della profilo
+        if (id == R.id.action_profilo) {
+            Profilo fragment = new Profilo();
+            getFragmentManager().beginTransaction().add(R.id.fragment, fragment).commit();
+            FrameLayout profilo = findViewById(R.id.fragment);
+
+            if(flag){
+                profilo.setVisibility(View.VISIBLE);
+                cal.setVisibility(View.GONE);
+                iconaProfilo.setIcon(getResources().getDrawable(R.drawable.calendar));
+                flag = false;
+            }
+            else{
+                profilo.setVisibility(View.GONE);
+                cal.setVisibility(View.VISIBLE);
+                iconaProfilo.setIcon(getResources().getDrawable(R.drawable.profilo));
+                flag = true;
+            }
         }
 
         if(id == R.id.logout){

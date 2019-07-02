@@ -78,14 +78,27 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp">
-            <EditText
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Data di nascita:"
+                android:textSize="25dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="3dp"/>
+
+            <DatePicker
                 android:id="@+id/input_dataNascita"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="date"
                 android:textColor="@android:color/white"
-                android:hint="Data di nascita(aaaa-mm-gg)"/>
+                android:datePickerMode="spinner"
+                android:spinnersShown="true"
+                android:calendarViewShown="false"
+                >
+
+            </DatePicker>
+
         </android.support.design.widget.TextInputLayout>
 
 

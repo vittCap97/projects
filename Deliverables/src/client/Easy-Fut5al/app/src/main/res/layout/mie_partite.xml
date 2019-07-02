@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintLayout"
@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".SezioneHome">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
 
     <LinearLayout
@@ -43,8 +49,53 @@
         <ListView
             android:id="@+id/partite_inCorso"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:scrollbarSize="20dp"
+            android:scrollIndicators="right"
+            android:fastScrollAlwaysVisible="true"
+            android:fastScrollEnabled="false">
         </ListView>
+
+
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="40sp"
+                android:layout_height="35sp"
+                android:background="@drawable/left"
+                android:layout_marginRight="5sp"
+                />
+
+            <TextView
+                android:id="@+id/daGiocare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Le mie partite da giocare"
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:textSize="25dp"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/partite_DaGiocare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbarSize="20dp"
+            android:scrollIndicators="right"
+            android:fastScrollAlwaysVisible="true"
+            android:fastScrollEnabled="false">
+        </ListView>
+
+
+
 
     </LinearLayout>
 
@@ -82,9 +133,14 @@
         android:id="@+id/lista_partite_giocate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="55dp">
+        android:layout_marginBottom="65dp"
+        android:scrollbarSize="20dp"
+        android:scrollIndicators="right"
+        android:fastScrollAlwaysVisible="true"
+        android:fastScrollEnabled="false">
     </ListView>
 
 
+    </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

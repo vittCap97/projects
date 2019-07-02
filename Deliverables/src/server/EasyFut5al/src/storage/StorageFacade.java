@@ -4,7 +4,18 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedList;
 
+/**
+ * 
+ * @author Fernet
+ * Storage Facade fa uso del pattern Facade e fornisce bl bla
+ * 
+ *
+ */
+//SINGLETON
 public class StorageFacade{
+	
+	private static volatile StorageFacade instance;
+
 	
 	private AtletaDAO atletaDao;
 	private CampettoDAO campettoDao;
@@ -20,10 +31,38 @@ public class StorageFacade{
 		partitaDao = new PartitaDAO();
 		giocaDao = new GiocaDAO();
 	}
-
-
 	
-	public int Salva(Bean b) {
+	public static StorageFacade getInstance() {
+		if (instance == null) {
+			synchronized (StorageFacade.class) {
+				if (instance == null)
+					instance = new StorageFacade();
+			}
+		}
+		return instance;
+	}
+
+
+	/**
+	 * Tal metodo ritorna un bean
+	 * Context Registration:: Student insertRegistrationStudent(Dati); <br>
+pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true<br>
+
+Context Registration:: Secretary insertRegistrationSecretary(Dati); <br>
+pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true && 
+isDataValid(dati)==true
+
+Context Registration:: Council
+insertRegistrationConsiglioDidattico(Dati); 
+pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true && 
+isDataValid(dati)==true
+
+	 * @param b è il bean da salvare
+	 * @return il codice di controllo
+	 * 
+	 */
+	
+	public synchronized int  Salva(Bean b) {
 		
 		
 		String type = b.getClass().getName();
@@ -61,9 +100,15 @@ public class StorageFacade{
 			}
 			break;
 			
+		// Non ci possono essere due istanze "gioca" per un atleta su stessa partita
+		// non ci devono essere più di 10 persone per partita
 		case "storage.Gioca":
 			try {
-				giocaDao.add(b);
+				if(IsNonRidondate(b) && MinDi10(b)) giocaDao.add(b);
+				else { 
+					System.out.println("Vincoli violati, ma no problem, non salvo");
+					return 0;
+				}
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -88,14 +133,28 @@ public class StorageFacade{
 			
 		}	
 		
+		
 		return 0;
 	}
 	
 
+	//Vincoli su gioca*******************
+	public synchronized boolean MinDi10(Bean b) {
+		if(giocaDao.NumGiocDellapartita(b) > 10) return false;
+		else return true;
+	}
 	
+
 	
+	public synchronized  boolean IsNonRidondate(Bean b) {
+		if(giocaDao.findRidondance(b) >1) return false;
+		return true;
+		
+	}
+	//***********************************
 	
-	public Collection<Bean> getLista(String type){
+
+	public synchronized Collection<Bean> getLista(String type){
 		
 		Collection<Bean> beans =  new LinkedList<Bean>();
 		
@@ -139,7 +198,7 @@ public class StorageFacade{
 	
 	
 	
-	public Bean getOggetto(String type, int id) {
+	public synchronized Bean getOggetto(String type, int id) {
 		
 		Bean b = null;
 		
@@ -186,7 +245,7 @@ public class StorageFacade{
 	
 	
 	//id oggetti nel db da aggiornare, b= bean che lo rimpiazzerà
-	public void aggiorna(Bean b) {
+	public synchronized void aggiorna(Bean b) {
 		String type = b.getClass().getName();
 		
 		switch(type) {
@@ -228,7 +287,7 @@ public class StorageFacade{
 	}
 	
 	
-	public void elimina(Bean b) {
+	public synchronized void  elimina(Bean b) {
 		String type = b.getClass().getName();
 		
 		switch(type) {
@@ -261,10 +320,14 @@ public class StorageFacade{
 		default:
 			System.out.println("Tipo oggetto non trovato");
 
-		}
-		
-	    
-		
+		}		
+	}
+	
+	
+	
+	
+	public synchronized int  IDultimaPartita() {
+		return partitaDao.lastIDAdd();
 	}
 	
 	

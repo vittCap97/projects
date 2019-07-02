@@ -8,11 +8,22 @@
     tools:context="com.example.fernet.easy_fut5al.ActivityGestore">
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <FrameLayout
+        android:visibility="gone"
         android:id="@+id/calendary"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <FrameLayout
+        android:visibility="gone"
+        android:id="@+id/fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
+    </LinearLayout>
 
 </ScrollView>

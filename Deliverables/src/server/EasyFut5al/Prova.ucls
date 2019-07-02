@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.2" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <package id="1" language="java" name="ConfermaCampetto" project="EasyFut5al" file="/EasyFut5al/src/ConfermaCampetto" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="197" width="335" x="71" y="332"/>    
+    <display autosize="false" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="2" language="java" name="storage" project="EasyFut5al" file="/EasyFut5al/src/storage" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="236" width="507" x="442" y="623"/>    
+    <display autosize="false" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="3" language="java" name="middleware" project="EasyFut5al" file="/EasyFut5al/src/middleware" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="206" width="569" x="412" y="78"/>    
+    <display autosize="false" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="4" language="java" name="PrenotazioniManager" project="EasyFut5al" 
+    file="/EasyFut5al/src/PrenotazioniManager" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="251" width="399" x="1064" y="287"/>    
+    <display autosize="false" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <dependency id="5">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="6">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="7">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

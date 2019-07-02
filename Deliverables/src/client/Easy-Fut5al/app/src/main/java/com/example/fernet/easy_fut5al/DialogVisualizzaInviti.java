@@ -93,7 +93,7 @@ public class DialogVisualizzaInviti extends Dialog {
                     //Do forfait per cancellare il gioca con stato "riservato e fare una nuova partecipazione con lo stato "Sicuro"
                     daiForfait(partecipa.getTag());
                     uniscitiPartitaPubblica(partecipa.getTag());
-
+                    listView.setVisibility(View.INVISIBLE);
                 }});
 
 
@@ -101,6 +101,8 @@ public class DialogVisualizzaInviti extends Dialog {
                 @Override
                 public void onClick(View v) {
                     daiForfait(rifiuta.getTag());
+                    listView.setVisibility(View.INVISIBLE);
+
                 }});
 
 
@@ -150,7 +152,8 @@ public class DialogVisualizzaInviti extends Dialog {
                 @Override
                 protected void gestisciRispostaServer() {
                     if(getOutputDalServer().get(0).equals("Rimozione completata"))
-                        Toast.makeText(getContext().getApplicationContext(), "Hai rifiutato l'inviyo", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext().getApplicationContext(), "Hai rifiutato l'invito", Toast.LENGTH_LONG).show();
+
                     else Toast.makeText(getContext().getApplicationContext(), "Ops, abbiamo riscontrato un problema", Toast.LENGTH_LONG).show();
 
                 }};

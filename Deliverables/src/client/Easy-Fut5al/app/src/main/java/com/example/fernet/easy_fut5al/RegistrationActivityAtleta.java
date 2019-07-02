@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -30,7 +31,8 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
     private RadioGroup sessoRadioGroup;
     private Button btnConferma;
     private boolean check;
-    private EditText inputNome, inputCognome,inputUsername,inputCitta,inputDataNascita,inputRuolo, inputEmail, inputPassword, inputConfermaPassword;
+    private EditText inputNome, inputCognome,inputUsername,inputCitta,inputRuolo, inputEmail, inputPassword, inputConfermaPassword;
+    private DatePicker inputDataNascita;
     public static  String URL;
 
 
@@ -45,7 +47,7 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
         inputNome = (EditText) findViewById(R.id.input_nome);
         inputCognome = (EditText) findViewById(R.id.input_cognome);
         inputUsername=(EditText) findViewById(R.id.input_username);
-        inputDataNascita=(EditText) findViewById(R.id.input_dataNascita);
+        inputDataNascita=(DatePicker) findViewById(R.id.input_dataNascita);
         inputEmail = (EditText) findViewById(R.id.input_email);
         inputPassword = (EditText) findViewById(R.id.input_password);
         inputConfermaPassword= (EditText) findViewById(R.id.input_passwordMatch);
@@ -79,7 +81,10 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
                                 obj.addProperty("password", inputPassword.getText().toString());
                                 obj.addProperty("nome", inputNome.getText().toString());
                                 obj.addProperty("cognome", inputCognome.getText().toString());
-                                obj.addProperty("data", inputDataNascita.getText().toString());
+
+                                String data = inputDataNascita.getYear()+"-"+inputDataNascita.getMonth()+"-"+inputDataNascita.getDayOfMonth();
+                                obj.addProperty("data", data);
+
                                 obj.addProperty("residenza", inputCitta.getText().toString());
                                 obj.addProperty("ruolo", inputRuolo.getText().toString());
                                 obj.addProperty("username", inputUsername.getText().toString());
@@ -109,6 +114,11 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
                             Intent intentMain;
                                 intentMain = new Intent(RegistrationActivityAtleta.this,ActivityAtleta.class);
                                 startActivity(intentMain);}
+
+                            else{
+                                Toast.makeText(RegistrationActivityAtleta.this, "l'Email specificata risulta già registrata.", Toast.LENGTH_LONG).show();
+
+                            }
                         }
                     };
                     task.execute();
@@ -138,10 +148,12 @@ public class RegistrationActivityAtleta extends AppCompatActivity {
             inputUsername.setError(getResources().getString(R.string.check_reg));
         }
 
+        /*
         if(inputDataNascita.getText().toString().length()==0){
             controllo=false;
             inputDataNascita.setError(getResources().getString(R.string.check_reg));
-        }
+        }*/
+
         if(inputPassword.getText().toString().length()==0){
             controllo=false;
             inputPassword.setError(getResources().getString(R.string.check_reg));

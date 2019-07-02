@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS `Fut5al`.`Atleta` (
   `Residenza` VARCHAR(45) NULL,
   `RuoloPreferito` VARCHAR(45) NULL,
   `Username` VARCHAR(45) NOT NULL,
-  UNIQUE INDEX `Cod_UNIQUE` (`ID` ASC),
+  UNIQUE INDEX `Cod_UNIQUE` (`ID` ASC) VISIBLE,
   PRIMARY KEY (`Email`),
-  UNIQUE INDEX `Username_UNIQUE` (`Username` ASC) )
+  UNIQUE INDEX `Username_UNIQUE` (`Username` ASC) VISIBLE)
 ENGINE = InnoDB;
 
 
@@ -68,9 +68,9 @@ CREATE TABLE IF NOT EXISTS `Fut5al`.`Gestore` (
   `Cognome` VARCHAR(45) NOT NULL,
   `Username` VARCHAR(45) NOT NULL,
   `Campetto_ID` INT NOT NULL,
-  UNIQUE INDEX `Cod_UNIQUE` (`ID` ASC) ,
+  UNIQUE INDEX `Cod_UNIQUE` (`ID` ASC) VISIBLE,
   PRIMARY KEY (`Email`, `Campetto_ID`),
-  INDEX `fk_Gestore_Campetto1_idx` (`Campetto_ID` ASC) ,
+  INDEX `fk_Gestore_Campetto1_idx` (`Campetto_ID` ASC) VISIBLE,
   CONSTRAINT `fk_Gestore_Campetto1`
     FOREIGN KEY (`Campetto_ID`)
     REFERENCES `Fut5al`.`Campetto` (`ID`)
@@ -90,8 +90,8 @@ CREATE TABLE IF NOT EXISTS `Fut5al`.`Gioca` (
   `Partita_ID` INT NOT NULL,
   `StatoInvito` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`ID`),
-  INDEX `fk_Atleta_has_Partita_Partita1_idx` (`Partita_ID` ASC) ,
-  INDEX `fk_Atleta_has_Partita_Atleta1_idx` (`Atleta_Email` ASC),
+  INDEX `fk_Atleta_has_Partita_Partita1_idx` (`Partita_ID` ASC) VISIBLE,
+  INDEX `fk_Atleta_has_Partita_Atleta1_idx` (`Atleta_Email` ASC) VISIBLE,
   CONSTRAINT `fk_Atleta_has_Partita_Atleta1`
     FOREIGN KEY (`Atleta_Email`)
     REFERENCES `Fut5al`.`Atleta` (`Email`)
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `Fut5al`.`Partita` (
   `StatoPartita` VARCHAR(45) NOT NULL,
   `Campetto_ID` INT NOT NULL,
   PRIMARY KEY (`ID`, `Campetto_ID`),
-  INDEX `fk_Partita_Campetto1_idx` (`Campetto_ID` ASC) ,
+  INDEX `fk_Partita_Campetto1_idx` (`Campetto_ID` ASC) VISIBLE,
   CONSTRAINT `fk_Partita_Campetto1`
     FOREIGN KEY (`Campetto_ID`)
     REFERENCES `Fut5al`.`Campetto` (`ID`)

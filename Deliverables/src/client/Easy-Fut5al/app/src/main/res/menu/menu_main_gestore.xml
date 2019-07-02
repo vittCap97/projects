@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.fernet.easy_fut5al.ActivityAtleta">
+
+    <item
+        android:id="@+id/action_profilo"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/profilo"
+        android:orderInCategory="100"
+        android:title="notifica"
+        app:showAsAction="always" />
+
+    <item
+        android:title="pierlu1997@libero.it"
+        android:id="@+id/myemail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        />
+
+    <item
+        android:title="Disconnetti"
+        android:id="@+id/logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/disconnetti"
+        />
+
+
+</menu>

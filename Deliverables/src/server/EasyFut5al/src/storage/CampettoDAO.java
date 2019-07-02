@@ -41,7 +41,7 @@ public class CampettoDAO implements Fut5alDAO{
 				bean.setID(rs.getInt("ID"));
 				bean.setNome(rs.getString("Nome"));
 				bean.setTariffa(rs.getString("Tariffa"));
-				bean.setCitta(rs.getString("Città"));
+				bean.setCitta(rs.getString("Citta"));
 				bean.setValutazione(rs.getFloat("Valutazione"));
 				bean.setAgibilita(rs.getBoolean("Agibilita"));
 				campetti.add(bean);
@@ -81,7 +81,7 @@ public class CampettoDAO implements Fut5alDAO{
 				bean.setID(rs.getInt("ID"));
 				bean.setNome(rs.getString("Nome"));
 				bean.setTariffa(rs.getString("Tariffa"));
-				bean.setCitta(rs.getString("Città"));
+				bean.setCitta(rs.getString("Citta"));
 				bean.setValutazione(rs.getFloat("Valutazione"));
 				bean.setAgibilita(rs.getBoolean("Agibilita"));
 
@@ -112,7 +112,7 @@ public class CampettoDAO implements Fut5alDAO{
 		media = sommaTot/NumValutazioni;
 
 		
-		String query = "UPDATE " + TABLE_NAME+ " SET Valutazione="+(int)media+" WHERE ID ="+c.getID()+";";
+		String query = "UPDATE " + TABLE_NAME+ " SET Valutazione="+(int)media+", Agibilita="+c.isAgibilita()+" WHERE ID ="+c.getID()+";";
 		
 		System.out.println(query);
 		
@@ -138,7 +138,7 @@ public class CampettoDAO implements Fut5alDAO{
 		PreparedStatement preparedStatement = null;
 
 		String insertSQL = "INSERT INTO " + TABLE_NAME
-				+ " (Nome, Tariffa, Città, Agibilita,Valutazione) VALUES (?, ?, ?, ?,?)";
+				+ " (Nome, Tariffa, Citta, Agibilita,Valutazione) VALUES (?, ?, ?, ?,?)";
 
 		
 		Campetto a = (Campetto) b;

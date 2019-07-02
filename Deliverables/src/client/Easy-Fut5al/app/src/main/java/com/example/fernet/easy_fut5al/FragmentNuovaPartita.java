@@ -15,9 +15,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +45,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class FragmentNuovaPartita  extends Fragment {
 
+    private ScrollView scrollv;
     private ArrayList<String> partite;
     private ArrayList<String> CampettiDisponibili;
     public static  String URL1= "GetInfoServlet";
@@ -74,6 +77,8 @@ public class FragmentNuovaPartita  extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.crea_nuova_partita, container, false);
+        scrollv = v.findViewById(R.id.VistaNuovaPartita);
+
         listapartecipanti = v.findViewById(R.id.listaInvitati);
         conferma = v.findViewById(R.id.fine);
         layoutinviti = v.findViewById(R.id.invitatiMenu);
@@ -91,6 +96,13 @@ public class FragmentNuovaPartita  extends Fragment {
                 if(hasFocus) casellaorario.showDropDown();
             }
         });
+        casellaorario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                casellaorario.showDropDown();
+            }
+        });
+
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_element, R.id.textViewList,  orari);
         casellaorario.setAdapter(arrayAdapter);
@@ -143,6 +155,13 @@ public class FragmentNuovaPartita  extends Fragment {
                         CasellaNuovoInvitato.showDropDown();
                     }
                 });
+                CasellaNuovoInvitato.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        CasellaNuovoInvitato.showDropDown();
+
+                    }
+                });
             }
         };
         task.execute();
@@ -153,6 +172,7 @@ public class FragmentNuovaPartita  extends Fragment {
 
             @Override
             public void onClick(View vs) {
+
                 if(nNinvitati>9) {
                     Toast.makeText(getActivity(), "Superato limite invitati!", Toast.LENGTH_LONG).show();
                     return;}
@@ -178,9 +198,10 @@ public class FragmentNuovaPartita  extends Fragment {
 
                 listapartecipanti.addView(t);
                 lista_inv.add(t.getText().toString());
+                CasellaNuovoInvitato.setText("");
             }
 
-        });;
+        });
 
 
         conferma.setOnClickListener(new View.OnClickListener() {
@@ -237,6 +258,16 @@ public class FragmentNuovaPartita  extends Fragment {
                 };
 
                 taskPartita.execute();
+
+                System.out.println("Fine creazione");
+                scrollv.removeAllViews();
+                scrollv.setBackgroundResource(R.drawable.goodgame);
+                TextView goodgame = new TextView(getActivity().getApplicationContext());
+                goodgame.setTextColor(Color.RED);
+                goodgame.setText("Preparati per la partita!");
+                goodgame.setTextSize(30);
+                scrollv.addView(goodgame);
+
 
             }
         });

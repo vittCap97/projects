@@ -20,7 +20,7 @@ public class  Checkpartite implements Runnable {
 	public  Checkpartite(){
 		System.out.println("Inizializza ricerca partite pronte per giocare.. ");
 		partite =  new LinkedList<Bean>();
-		storage = new StorageFacade();
+		storage = StorageFacade.getInstance();
 	
 		
 	}
@@ -39,6 +39,7 @@ public class  Checkpartite implements Runnable {
 				pronta = check10sicuri(p.getID());//Controlla se ci sono 10 "sicuri"
 				
 				if(pronta) { 
+					System.out.println("La partita "+p.getID()+" è diventata da giocare");
 					p.setStatoPartita("DaGiocare");
 					storage.aggiorna(p);
 					
@@ -51,13 +52,23 @@ public class  Checkpartite implements Runnable {
 				Calendar c = Calendar.getInstance();
 	            String mese = String.format("%02d", c.get(Calendar.MONTH)+1);
 	            String giorno = String.format("%02d", c.get(Calendar.DAY_OF_MONTH));
-	            int Ora = c.get(Calendar.HOUR);
+	            int Ora = c.get(Calendar.HOUR_OF_DAY);
 	            String DataDiOggi = c.get(Calendar.YEAR)+"-"+mese+"-"+giorno;	
+	            //System.out.println("Data partita corrente:"+p.getData()+"scade alle "+ (p.getOra()-1) +" Data di oggi:"+DataDiOggi+" e sono le "+Ora);
 				//Se tra un ora si doveva giocare la partita
 				if(p.getData().equals(DataDiOggi) && (p.getOra()-1)==Ora) {
-					System.out.println("La partita sta per iniziare tra un ora!!");
-					if(p.getStatoPartita().equals("InSospeso")) p.setStatoPartita("Terminata");
-					if(p.getStatoPartita().equals("DaGiocare")) p.setStatoPartita("Cancellata");
+					//System.out.println("La partita sta per iniziare tra un ora!!");
+					if(p.getStatoPartita().equals("InSospeso")) { 
+						p.setStatoPartita("Cancellata");
+						storage.aggiorna(p);
+						//System.out.println("La partita "+p.getID()+" è diventata: Cancellata");
+
+					}
+					if(p.getStatoPartita().equals("DaGiocare")) {
+						p.setStatoPartita("Terminata"); //per convenzione, un ora prima non si può dar forfait perciò la considero terminata
+						storage.aggiorna(p);
+						//System.out.println("La partita "+p.getID()+" è diventata da Terminata");
+						}
 				}
 			}
 		}
@@ -70,10 +81,10 @@ public class  Checkpartite implements Runnable {
 		Collection<Bean> partecipanti = storage.getLista("storage.Gioca");
 		for(Bean g: partecipanti) {
 			Gioca partecipante= (Gioca) g;
-			if(partecipante.getStatoInvito().equals("Sicuro")) sicuri++;
+			if(partecipante.getStatoInvito().equals("Sicuro") && partecipante.getPartita_ID()==idPartita) sicuri++;
 		}
 		
-		if(sicuri == 10) return true;
+		if(sicuri >= 10) return true;
 		else return false;
 
 	}

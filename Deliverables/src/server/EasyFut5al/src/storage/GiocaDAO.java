@@ -153,4 +153,72 @@ public class GiocaDAO implements Fut5alDAO{
 	
 	
 	}
+	
+	
+	public synchronized int  NumGiocDellapartita(Bean b){
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+
+		int numRecord = 1;
+
+		Gioca g = (Gioca) b;
+		
+		String selectSQL = "SELECT * FROM " + this.TABLE_NAME+" WHERE Partita_ID="+g.getPartita_ID();
+
+		try {
+			connection = DriverManagerConnectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(selectSQL);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			
+			System.out.println(selectSQL);
+
+			
+			while (rs.next()) {
+				numRecord++;
+			}
+			
+			System.out.println("Num persone partecipanti alla partita:"+numRecord+"/10");
+
+			
+		}catch (Exception e) {
+		}
+		
+		return numRecord;
+				
+	}
+	
+	
+	
+	
+	public synchronized int findRidondance(Bean b){
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		
+		int numRecord = 1;
+
+		Gioca g = (Gioca) b;
+		
+		//record partecipazioni di quel giocatore per quella partita
+
+		String query = "SELECT *  FROM " + this.TABLE_NAME+ " WHERE Atleta_Email='"+g.getAtleta_Email() +"' AND Partita_ID="+g.getPartita_ID();
+		try {
+			connection = DriverManagerConnectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(query);
+
+			ResultSet rs = preparedStatement.executeQuery(query);
+			
+			System.out.println(query);
+			while (rs.next()) {
+				numRecord++;
+			}
+			
+			System.out.println("Numero di istanze gioca per quel giocatore:"+numRecord);
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return numRecord;
+	}
 }

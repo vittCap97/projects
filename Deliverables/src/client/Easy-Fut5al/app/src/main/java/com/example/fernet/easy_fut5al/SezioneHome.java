@@ -36,6 +36,7 @@ public  class SezioneHome extends  Fragment{
     public ArrayList<JsonObject> partite;
     public ArrayList<JsonObject> Miepartite;
     private ArrayList<JsonObject> Miepartiteterminate;
+    private ArrayList<JsonObject> MiePartiteDaGiocare;
 
     public static  String URL = "CercaPartiteServlet";
     private LayoutInflater Inflater;
@@ -153,10 +154,11 @@ public  class SezioneHome extends  Fragment{
         }
 
 
-        //Se è la seconda scheda
+        //Se è la seconda scheda(mie partite InSospeso/Terminate... forse faccio vedere anche quelle a cui partecipero')
         if(getArguments().getInt(ARG_SECTION_NUMBER)==1) {
             Miepartiteterminate = new ArrayList<>();
             Miepartite = new ArrayList<>();
+            MiePartiteDaGiocare = new ArrayList<>();
 
             ConnectionTask task2 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
                 @Override
@@ -202,6 +204,52 @@ public  class SezioneHome extends  Fragment{
 
 
             }};
+
+
+            ConnectionTask task4 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
+                @Override
+                protected void inviaDatiAlServer() {
+                    try {
+                        //ricava nome utente
+                        SharedPreferences prefs = getActivity().getSharedPreferences("DatiApplicazione", MODE_PRIVATE);
+                        String Email = prefs.getString("MyEmail", null);
+                        String data = "tipo_partite=DaGiocare&miapartecipazione=si&MyEmail="+Email;
+
+                        getConnessione().setDoOutput(true);//abilita la scrittura
+                        OutputStreamWriter wr = new OutputStreamWriter(getConnessione().getOutputStream());
+                        wr.write(data);//scrittura del content
+                        wr.flush();
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+
+                @Override
+                protected void gestisciRispostaServer() {
+
+                    if(getOutputDalServer()==null) {
+                        Toast.makeText(getActivity().getApplicationContext(), "Nessuna partita trovata", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    for (String partita : getOutputDalServer()) {
+                        JsonObject jsonObject;
+                        try {
+                            jsonObject = new JsonParser().parse(partita).getAsJsonObject();
+                        } catch (Exception e) {
+                            jsonObject = null;
+                        }
+
+                        if (jsonObject != null) MiePartiteDaGiocare.add(jsonObject);
+
+                    }
+                    listView = Inflater.inflate(R.layout.mie_partite, Container).findViewById(R.id.partite_DaGiocare);
+                    CustomAdapter customAdapter = new CustomAdapter(getContext(), R.layout.list_elem_partita, MiePartiteDaGiocare, false);
+                    listView.setAdapter(customAdapter); //Magari questa operazione la faccio dentro al task asincrono
+
+
+                }};
 
             ConnectionTask task3 = new ConnectionTask(URL,getActivity().getApplicationContext()) {
                 @Override
@@ -249,6 +297,7 @@ public  class SezioneHome extends  Fragment{
                 }};
             task2.execute();
             task3.execute();
+            task4.execute();
 
             rootView = inflater.inflate(R.layout.mie_partite, container, false);
         }

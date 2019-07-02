@@ -113,6 +113,10 @@ public class RegistrationActivityGestore extends AppCompatActivity {
                                 Toast.makeText(RegistrationActivityGestore.this, "Registrazione avvenuta con successo!\nAttenda che i nostri addetti verifichino l'agibilità del campetto specificato prima di riaccedere al sistema.", Toast.LENGTH_LONG).show();
                                 finish();
                             }
+                            else{
+                                Toast.makeText(RegistrationActivityGestore.this, "l'Email specificata risulta già registrata.", Toast.LENGTH_LONG).show();
+
+                            }
                         }
                     };
                     //Avvia il task asyncrono sull'url specificato

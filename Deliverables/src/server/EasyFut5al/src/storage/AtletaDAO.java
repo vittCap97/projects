@@ -50,8 +50,6 @@ public  class AtletaDAO implements Fut5alDAO{
 				bean.setUsername(rs.getString("Username"));
 
 				atleti.add(bean);
-				System.out.println(bean.getID()+"\n");
-
 			}
 
 		} finally {

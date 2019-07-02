@@ -16,6 +16,7 @@ import java.util.LinkedList;
 public class PartitaDAO implements Fut5alDAO {
 	
 	private final String TABLE_NAME = "partita";
+	private Connection connection;
 
 	@Override
 	public synchronized Collection<Bean> getAll() throws SQLException {
@@ -161,6 +162,31 @@ public class PartitaDAO implements Fut5alDAO {
 	public synchronized void remove(int id) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	
+	
+	
+	public synchronized int lastIDAdd(){
+
+		
+	    PreparedStatement stat;
+	    ResultSet rs;
+	    String sql = "SELECT MAX(ID) AS max_id FROM "+TABLE_NAME;
+	    try {
+			connection = DriverManagerConnectionPool.getConnection();
+	    stat = connection.prepareStatement(sql);
+	    rs = stat.executeQuery();
+
+	    if (rs.next()) {
+	        System.out.println("ID dell'ultima partita:"+rs.getInt("max_id"));
+	        return rs.getInt("max_id");
+	    }
+	    } catch (Exception e) {
+			// TODO: handle exception
+		}
+	    
+		return -1;
 	}
 	
 
