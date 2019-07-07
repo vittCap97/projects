@@ -44,18 +44,7 @@ public class StorageFacade{
 
 
 	/**
-	 * Tal metodo ritorna un bean
-	 * Context Registration:: Student insertRegistrationStudent(Dati); <br>
-pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true<br>
-
-Context Registration:: Secretary insertRegistrationSecretary(Dati); <br>
-pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true && 
-isDataValid(dati)==true
-
-Context Registration:: Council
-insertRegistrationConsiglioDidattico(Dati); 
-pre: not isNull(Dati) && isFormatDataCorrect(Dati)==true && 
-isDataValid(dati)==true
+	 * 
 
 	 * @param b è il bean da salvare
 	 * @return il codice di controllo
@@ -183,6 +172,7 @@ isDataValid(dati)==true
 
 		default:
 			System.out.println("Tipo oggetto non trovato");
+			beans = null;//Aggiunto dopo il test
 				
 		}
 		

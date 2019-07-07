@@ -80,7 +80,7 @@ public  class AtletaDAO implements Fut5alDAO{
 		try {
 			connection = DriverManagerConnectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(selectSQL);
-			preparedStatement.setInt(2, id);
+			preparedStatement.setInt(1, id); //PRIMA ERA 2, mmh!!!!!!!!!!!!!!
 
 			ResultSet rs = preparedStatement.executeQuery();
 

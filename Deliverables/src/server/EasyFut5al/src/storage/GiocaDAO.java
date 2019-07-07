@@ -78,8 +78,11 @@ public class GiocaDAO implements Fut5alDAO{
 
 		} finally {
 			try {
-				if (preparedStatement != null)
+				if (preparedStatement != null) {
 					preparedStatement.close();
+					bean = null; //AGGIUNTO DOPO IL CASO DI TEST
+					}
+				
 			} finally {
 				DriverManagerConnectionPool.releaseConnection(connection);
 			}

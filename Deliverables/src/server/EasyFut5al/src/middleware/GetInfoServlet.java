@@ -42,6 +42,7 @@ public class GetInfoServlet extends HttpServlet {
 		
 	    PrintWriter out = response.getWriter();
    
+	     if(tipo_oggetto.equals("Atleta") || tipo_oggetto.equals("Campetto")) { 
          Collection<Bean> beans = storage.getLista("storage."+tipo_oggetto);
 		 for(Bean b: beans) {
 			 
@@ -54,7 +55,7 @@ public class GetInfoServlet extends HttpServlet {
 				 if(c.isAgibilita()) out.println(c.getNome()); // solo quelli agibili però
 			 }
 		 }
-
+	     }
 	}
 
 	

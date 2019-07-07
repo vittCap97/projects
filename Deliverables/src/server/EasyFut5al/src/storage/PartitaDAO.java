@@ -86,8 +86,10 @@ public class PartitaDAO implements Fut5alDAO {
 		catch(Exception e){e.printStackTrace();}
 		finally {
 			try {
-				if (preparedStatement != null)
+				if (preparedStatement != null) {
 					preparedStatement.close();
+					bean = null;
+				}
 			} 
 			catch(Exception e){e.printStackTrace();}
 			finally {
