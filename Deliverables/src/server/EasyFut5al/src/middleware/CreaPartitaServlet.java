@@ -22,7 +22,7 @@ import storage.Partita;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class CreaPartitaServlet
+ * Servlet dedicata alla creazione di una nuova partita
  */
 @WebServlet("/CreaPartitaServlet")
 public class CreaPartitaServlet extends HttpServlet {

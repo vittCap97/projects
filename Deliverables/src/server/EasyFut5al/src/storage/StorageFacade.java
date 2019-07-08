@@ -7,7 +7,8 @@ import java.util.LinkedList;
 /**
  * 
  * @author Fernet
- * Storage Facade fa uso del pattern Facade e fornisce bl bla
+ * Storage Facade fa uso del pattern Facade e fornisce dei 
+ * metodi per trasformare/Estrarre oggetti permanenti in istanze java
  * 
  *
  */
@@ -45,7 +46,7 @@ public class StorageFacade{
 
 	/**
 	 * 
-
+	 * Serve per rendere persistente sul db un bean
 	 * @param b è il bean da salvare
 	 * @return il codice di controllo
 	 * 
@@ -128,13 +129,22 @@ public class StorageFacade{
 	
 
 	//Vincoli su gioca*******************
+	/**
+	 * Impone che in una partita non ci possono essere più di 10 giocatori
+	 * @param l'ultima partecipazione aggiunta
+	 * @return il valore di verità del vincolo
+	 */
 	public synchronized boolean MinDi10(Bean b) {
 		if(giocaDao.NumGiocDellapartita(b) > 10) return false;
 		else return true;
 	}
 	
 
-	
+	/**
+	 * Impone che la partecipazione ad una partita per un giocatore non venga inserita più volte
+	 * @param b
+	 * @return valore di verità del vincolo
+	 */
 	public synchronized  boolean IsNonRidondate(Bean b) {
 		if(giocaDao.findRidondance(b) >1) return false;
 		return true;
@@ -143,6 +153,10 @@ public class StorageFacade{
 	//***********************************
 	
 
+	/**
+	 * @param Tipo di un bean
+	 * @return una lista di bean di quel tipo
+	 */
 	public synchronized Collection<Bean> getLista(String type){
 		
 		Collection<Bean> beans =  new LinkedList<Bean>();
@@ -187,7 +201,12 @@ public class StorageFacade{
 	
 	
 	
-	
+	/**
+	 * 
+	 * @param Tipo del bean da ottenere
+	 * @param id del bean 
+	 * @return bean desiderato
+	 */
 	public synchronized Bean getOggetto(String type, int id) {
 		
 		Bean b = null;
@@ -233,7 +252,10 @@ public class StorageFacade{
 	}
 	
 	
-	
+	/**
+	 * Sostituisce un record persistente con i valori del bean dato come input
+	 * @param b dato in input
+	 */
 	//id oggetti nel db da aggiornare, b= bean che lo rimpiazzerà
 	public synchronized void aggiorna(Bean b) {
 		String type = b.getClass().getName();
@@ -277,6 +299,10 @@ public class StorageFacade{
 	}
 	
 	
+	/**
+	 * Elimina il bean specificato in input nel database
+	 * @param b
+	 */
 	public synchronized void  elimina(Bean b) {
 		String type = b.getClass().getName();
 		
@@ -315,7 +341,10 @@ public class StorageFacade{
 	
 	
 	
-	
+	/**
+	 * ritorna l'ID dell'ultima partita salvata
+	 * @return
+	 */
 	public synchronized int  IDultimaPartita() {
 		return partitaDao.lastIDAdd();
 	}

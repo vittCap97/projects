@@ -21,7 +21,7 @@ import storage.Partita;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class CheckInvitiServlet
+ * Servlet che serve per spedire un invito ad un giocatore
  */
 @WebServlet("/CheckInvitiServlet")
 public class CheckInvitiServlet extends HttpServlet {

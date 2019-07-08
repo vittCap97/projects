@@ -1,11 +1,13 @@
 package storage;
 
+/**
+ * Rappresenta un Atleta
+ * @author Fernet
+ *
+ */
 public class Atleta extends Bean {
 	
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 3181493217886046261L;
 	private String email;
 	private String password;

@@ -19,7 +19,7 @@ import storage.Campetto;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class CercaPartiteServlet
+ * Servlet che restituisce una lista di oggetti della tipologia specificata
  */
 @WebServlet("/GetInfoServlet")
 public class GetInfoServlet extends HttpServlet {
@@ -42,6 +42,7 @@ public class GetInfoServlet extends HttpServlet {
 		
 	    PrintWriter out = response.getWriter();
    
+	    try{
 	     if(tipo_oggetto.equals("Atleta") || tipo_oggetto.equals("Campetto")) { 
          Collection<Bean> beans = storage.getLista("storage."+tipo_oggetto);
 		 for(Bean b: beans) {
@@ -55,11 +56,14 @@ public class GetInfoServlet extends HttpServlet {
 				 if(c.isAgibilita()) out.println(c.getNome()); // solo quelli agibili però
 			 }
 		 }
+	     }}catch (Exception e) {
+	    	 System.out.println("Keep calm");
+	    	 out.println(""); //MMMMMMMH
 	     }
 	}
 
-	
 	/**
+	 * 
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

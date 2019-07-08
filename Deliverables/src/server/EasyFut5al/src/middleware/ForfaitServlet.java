@@ -15,7 +15,7 @@ import storage.Gioca;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class ForfaitServlet
+ * Servlet che disassocia un atleta da una partita
  */
 @WebServlet("/ForfaitServlet")
 public class ForfaitServlet extends HttpServlet {

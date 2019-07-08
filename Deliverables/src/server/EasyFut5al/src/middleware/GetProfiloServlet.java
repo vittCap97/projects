@@ -19,7 +19,7 @@ import storage.Gestore;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class GetProfiloServlet
+ * Servlet che fornisce info sul proprio profilo
  */
 @WebServlet("/GetProfiloServlet")
 public class GetProfiloServlet extends HttpServlet {

@@ -1,10 +1,13 @@
 package storage;
 
+/**
+ * Rappresenta un campetto da calcio
+ * @author Fernet
+ *
+ */
 public class Campetto extends Bean{
 	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -2163079080317808697L;
 	private String nome;
 	private String tariffa;

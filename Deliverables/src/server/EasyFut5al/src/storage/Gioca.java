@@ -1,5 +1,10 @@
 package storage;
 
+/**
+ * Rappresenta una partecipazione di un atleta ad una partita
+ * @author Fernet
+ *
+ */
 public class Gioca extends Bean{
 	
 	/**

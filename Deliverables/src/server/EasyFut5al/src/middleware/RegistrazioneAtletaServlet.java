@@ -19,7 +19,7 @@ import storage.StorageFacade;
 
 
 /**
- * Servlet implementation class RegistrazioneAtletaServlet
+ * Serlvet che si occupa della registrazione dell'atleta
  */
 @WebServlet("/RegistrazioneAtletaServlet")
 public class RegistrazioneAtletaServlet extends HttpServlet {

@@ -10,6 +10,11 @@ import storage.Bean;
 import storage.Campetto;
 import storage.StorageFacade;
 
+/**
+ * GUI che usa l'amministratore per confermare i campetti validi
+ * @author Fernet
+ *
+ */
 public class PannelloAmministratore {
 	
 	private static StorageFacade storage;

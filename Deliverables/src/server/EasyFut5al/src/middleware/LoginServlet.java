@@ -20,6 +20,11 @@ import java.util.Iterator;
 
 @WebServlet("/LoginServlet")
 
+/**
+ * Servlet che si occupa di effettuare il login
+ * @author Fernet
+ *
+ */
 public class LoginServlet extends HttpServlet {
 
 	

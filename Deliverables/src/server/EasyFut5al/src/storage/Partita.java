@@ -1,5 +1,10 @@
 package storage;
 
+/**
+ * Rappresenta una partita
+ * @author Fernet
+ *
+ */
 public class Partita extends Bean{
 
 	/**

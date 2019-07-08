@@ -3,6 +3,11 @@ package storage;
 import java.sql.SQLException;
 import java.util.Collection;
 
+/**
+ * Interfaccia comune a tutti i bean per le operazioni DAO
+ * @author Fernet
+ *
+ */
 public interface Fut5alDAO{
 	
 

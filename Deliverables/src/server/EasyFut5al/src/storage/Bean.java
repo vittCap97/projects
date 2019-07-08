@@ -2,6 +2,13 @@ package storage;
 
 import java.io.Serializable;
 
+
+/**
+ * Rappresenta un modello per ogni oggetto persistente
+ * @author Fernet
+ *
+ */
+
 public abstract class Bean implements Serializable{
 	
 	/**

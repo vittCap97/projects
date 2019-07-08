@@ -15,7 +15,7 @@ import storage.Campetto;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class ValutaCampettoServlet
+ * Servlet che valuta il campetto della partita appena terminata
  */
 @WebServlet("/ValutaCampettoServlet")
 public class ValutaCampettoServlet extends HttpServlet {

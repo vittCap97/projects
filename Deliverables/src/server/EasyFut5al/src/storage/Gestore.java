@@ -1,5 +1,10 @@
 package storage;
 
+/**
+ * Rappresenta un gestore
+ * @author Fernet
+ *
+ */
 public class Gestore extends Bean{
 	
 	/**

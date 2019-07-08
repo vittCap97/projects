@@ -7,6 +7,11 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Classe che si occupa di fornire una connessione con il database
+ * @author Fernet
+ *
+ */
 public class DriverManagerConnectionPool  {
 
 	private static List<Connection> freeDbConnections;

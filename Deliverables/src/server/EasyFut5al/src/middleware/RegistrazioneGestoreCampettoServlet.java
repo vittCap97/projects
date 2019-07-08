@@ -20,7 +20,7 @@ import storage.Gestore;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class RegistrazioneCampettoServlet
+ * Servlet che si occupa della registrazione del gestore e del relativo campetto
  */
 @WebServlet("/RegistrazioneGestoreCampettoServlet")
 public class RegistrazioneGestoreCampettoServlet extends HttpServlet {

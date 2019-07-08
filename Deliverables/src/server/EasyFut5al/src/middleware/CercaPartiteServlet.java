@@ -20,7 +20,7 @@ import storage.Partita;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class CercaPartiteServlet
+ * Servlet che restituisce partite del db
  */
 @WebServlet("/CercaPartiteServlet")
 public class CercaPartiteServlet extends HttpServlet {

@@ -16,7 +16,7 @@ import storage.Gioca;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class UniscitiServlet
+ * Servlet che crea un'istanza di partecipazione alla partita specificata
  */
 @WebServlet("/UniscitiServlet")
 public class UniscitiServlet extends HttpServlet {

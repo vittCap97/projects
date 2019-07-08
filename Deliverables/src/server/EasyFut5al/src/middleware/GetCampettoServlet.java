@@ -16,7 +16,7 @@ import storage.Gestore;
 import storage.StorageFacade;
 
 /**
- * Servlet implementation class GetCampettoServlet
+ * Servlet che restituisce il nome del campetto del gestore richiedente
  */
 @WebServlet("/GetCampettoServlet")
 public class GetCampettoServlet extends HttpServlet {
